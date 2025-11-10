@@ -5,14 +5,14 @@ import { Link, usePage } from '@inertiajs/react';
 import AppLogo from './app-logo';
 import AdminSideBar from './sidebar/admin-sidebar';
 import HotelSidebar from './sidebar/hotel-sidebar';
-import LandingSidebar from './sidebar/landing-area';
+import ResortSidebar from './sidebar/resort-sidebar';
 import LandingAreaSidebar from './sidebar/landing-area-sidebar';
 import RestaurantSidebar from './sidebar/restaurant-sidebar';
 import UbaapSidebar from './sidebar/ubaap';
 
 const roleSidebar = {
     1: <AdminSideBar />,
-    4: <LandingSidebar />,
+    4: <ResortSidebar />,
     5: <UbaapSidebar />,
     6: <HotelSidebar />,
     7: <RestaurantSidebar />,

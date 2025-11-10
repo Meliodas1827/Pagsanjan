@@ -46,9 +46,9 @@ const mainNavItems: NavItem[] = [
         icon: ContactRound,
     },    
      {
-        title: 'Feedback',
-        href: '/feedback',
-        icon: Star,
+        title: 'Feedbacks',
+        href: '/feedbacks',
+        icon: MessageSquare,
     }
 
 ];

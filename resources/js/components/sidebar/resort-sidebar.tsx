@@ -1,23 +1,23 @@
 import { NavItem } from '@/types';
-import { LayoutGrid, MessageSquare, QrCode } from 'lucide-react';
+import { BookOpen, DollarSign, MessageSquare, QrCode } from 'lucide-react';
 import { NavMain } from '../nav-main';
 import { SidebarContent } from '../ui/sidebar';
 
 const mainNavItems: NavItem[] = [
     {
-        title: 'Dashboard',
-        href: '/landing-area-dashboard',
-        icon: LayoutGrid,
-    },
-    {
-        title: 'Customer Requests',
-        href: '/landing-area-requests',
-        icon: MessageSquare,
+        title: 'Bookings',
+        href: '/resort-bookings',
+        icon: BookOpen,
     },
     {
         title: 'Payment QR',
-        href: '/landing-area-payment-qr',
+        href: '/resort-payment-qr',
         icon: QrCode,
+    },
+    {
+        title: 'Entrance Fee',
+        href: '/resort-entrance-fee',
+        icon: DollarSign,
     },
     {
         title: 'Feedbacks',
@@ -26,10 +26,10 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
-export default function LandingAreaSidebar() {
+export default function ResortSidebar() {
     return (
         <SidebarContent className="bg-[#275430] text-white">
-            <NavMain items={mainNavItems} subtitle="Landing Area Panel" />
+            <NavMain items={mainNavItems} subtitle="Resort Panel" />
         </SidebarContent>
     );
 }

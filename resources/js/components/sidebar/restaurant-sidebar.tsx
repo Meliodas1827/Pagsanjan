@@ -1,5 +1,5 @@
 import { NavItem } from '@/types';
-import { CalendarCheck, Table } from 'lucide-react';
+import { CalendarCheck, MessageSquare, Table } from 'lucide-react';
 import { NavMain } from '../nav-main';
 import { SidebarContent } from '../ui/sidebar';
 
@@ -13,6 +13,11 @@ const mainNavItems: NavItem[] = [
         title: 'Bookings',
         href: '/restaurant-bookings',
         icon: CalendarCheck,
+    },
+    {
+        title: 'Feedbacks',
+        href: '/feedbacks',
+        icon: MessageSquare,
     },
     // {
     //     title: 'Message',

@@ -11,6 +11,7 @@ interface User {
     name: string;
     email: string;
     role_id: number;
+    resort_id?: number | null;
     hotelid?: number | null;
     restoid?: number | null;
     landing_area_id?: number | null;
@@ -35,6 +36,11 @@ interface LandingArea {
     name: string;
 }
 
+interface Resort {
+    id: number;
+    resort_name: string;
+}
+
 interface EditUserDialogProps {
     user: User;
     children: ReactNode;
@@ -42,15 +48,17 @@ interface EditUserDialogProps {
 
 export default function EditUserDialog({ user, children }: EditUserDialogProps) {
     const [open, setOpen] = useState(false);
-    const { hotels, restaurants, landingAreas } = usePage().props as {
+    const { hotels, restaurants, landingAreas, resorts } = usePage().props as {
         hotels: Hotel[],
         restaurants: Restaurant[],
-        landingAreas: LandingArea[]
+        landingAreas: LandingArea[],
+        resorts: Resort[]
     };
     const { data, setData, put, processing, errors, reset } = useForm({
         name: user.name,
         email: user.email,
         role: user.role_id.toString(),
+        resort_id: user.resort_id?.toString() || '',
         hotelid: user.hotelid?.toString() || '',
         restoid: user.restoid?.toString() || '',
         landing_area_id: user.landing_area_id?.toString() || '',
@@ -62,6 +70,7 @@ export default function EditUserDialog({ user, children }: EditUserDialogProps) 
                 name: user.name,
                 email: user.email,
                 role: user.role_id.toString(),
+                resort_id: user.resort_id?.toString() || '',
                 hotelid: user.hotelid?.toString() || '',
                 restoid: user.restoid?.toString() || '',
                 landing_area_id: user.landing_area_id?.toString() || '',
@@ -137,6 +146,25 @@ export default function EditUserDialog({ user, children }: EditUserDialogProps) 
                         </Select>
                         {errors.role && <p className="text-sm text-red-500">{errors.role}</p>}
                     </div>
+
+                    {data.role === '4' && (
+                        <div className="space-y-2">
+                            <Label htmlFor="edit-resort">Assign Resort</Label>
+                            <Select value={data.resort_id} onValueChange={(value) => setData('resort_id', value)}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select a resort" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {resorts.map((resort) => (
+                                        <SelectItem key={resort.id} value={resort.id.toString()}>
+                                            {resort.resort_name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            {errors.resort_id && <p className="text-sm text-red-500">{errors.resort_id}</p>}
+                        </div>
+                    )}
 
                     {data.role === '6' && (
                         <div className="space-y-2">

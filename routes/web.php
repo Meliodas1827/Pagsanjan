@@ -43,6 +43,9 @@ use App\Http\Controllers\Resort\ResortPaymentController;
 use App\Http\Controllers\Resort\ResortReservationController;
 use App\Http\Controllers\Resort\ResortScheduleController;
 use App\Http\Controllers\Resort\RevenueController;
+use App\Http\Controllers\Resort\ResortBookingsController;
+use App\Http\Controllers\Resort\ResortPaymentQRController;
+use App\Http\Controllers\Resort\ResortEntranceFeeController;
 use App\Http\Controllers\Shared\DashboardController;
 use App\Http\Controllers\Ubaap\BoatAssignController;
 use App\Http\Controllers\Ubaap\MessageController;
@@ -158,7 +161,6 @@ Route::group([], function () {
 
 Route::middleware(['auth', 'verified', 'role:admin,resort,customer,ubaap,hotel,restaurant'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('feedback', [FeedbackReportController::class, 'index']);
 });
 
 
@@ -262,6 +264,20 @@ Route::middleware(['auth', 'verified', 'role:resort'])->group(function () {
     Route::get('resort-payment', [ResortPaymentController::class, 'index']);
     Route::get('resort-guest-information', [GuestInfoController::class, 'index']);
     Route::get('resort-booking-information', [BookingInfoController::class, 'index']);
+
+    // New Resort Pages
+    Route::get('resort-bookings', [ResortBookingsController::class, 'index'])->name('resort.bookings');
+    Route::get('resort-payment-qr', [ResortPaymentQRController::class, 'index'])->name('resort.payment-qr');
+    Route::post('resort/{resort}/qrcode', [ResortPaymentQRController::class, 'updateQrCode'])->name('resort.update-qrcode');
+    Route::get('resort-entrance-fee', [ResortEntranceFeeController::class, 'index'])->name('resort.entrance-fee');
+    Route::put('resort/entrance-fee/{fee}', [ResortEntranceFeeController::class, 'update'])->name('resort.entrance-fee.update');
+});
+
+// Feedbacks - accessible to all roles
+Route::middleware(['auth', 'verified', 'role:admin,resort,ubaap,hotel,restaurant,landing_area'])->group(function () {
+    Route::get('feedbacks', [\App\Http\Controllers\FeedbackController::class, 'index'])->name('feedbacks.index');
+    Route::post('feedbacks', [\App\Http\Controllers\FeedbackController::class, 'store'])->name('feedbacks.store');
+    Route::delete('feedbacks/{feedback}', [\App\Http\Controllers\FeedbackController::class, 'destroy'])->name('feedbacks.destroy');
 });
 
 // landing area admin

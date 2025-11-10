@@ -1,5 +1,5 @@
 import { NavItem } from '@/types';
-import { LayoutGrid, Ship } from 'lucide-react';
+import { LayoutGrid, MessageSquare, Ship } from 'lucide-react';
 import { NavMain } from '../nav-main';
 import { SidebarContent } from '../ui/sidebar';
 
@@ -24,11 +24,11 @@ const Ubaap: NavItem[] = [
         href: '/manage-boats',
         icon: Ship,
     },
-    // {
-    //     title: 'Message',
-    //     href: '/message',
-    //     icon: MessageSquare,
-    // },
+    {
+        title: 'Feedbacks',
+        href: '/feedbacks',
+        icon: MessageSquare,
+    },
 ];
 
 export default function UbaapSidebar() {

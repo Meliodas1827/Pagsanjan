@@ -26,6 +26,7 @@ interface User {
     name: string;
     email: string;
     role_id: number;
+    resort_id?: number | null;
     hotelid?: number | null;
     restoid?: number | null;
     landing_area_id?: number | null;

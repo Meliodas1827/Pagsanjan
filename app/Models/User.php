@@ -22,6 +22,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'role_id',
+        'resort_id',
         'hotelid',
         'restoid',
         'landing_area_id',
@@ -86,5 +87,9 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function landingArea(){
         return $this->belongsTo(LandingArea::class, 'landing_area_id');
+    }
+
+    public function resort(){
+        return $this->belongsTo(Resort::class, 'resort_id');
     }
 }

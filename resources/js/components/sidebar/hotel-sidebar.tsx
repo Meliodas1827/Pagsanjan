@@ -1,5 +1,5 @@
 import { NavItem } from '@/types';
-import { BookCheck, CalendarCog, LayoutGrid, QrCode } from 'lucide-react';
+import { BookCheck, CalendarCog, LayoutGrid, MessageSquare, QrCode } from 'lucide-react';
 import { NavMain } from '../nav-main';
 import { SidebarContent } from '../ui/sidebar';
 
@@ -23,6 +23,11 @@ const mainNavItems: NavItem[] = [
         title: 'Payment QR Code',
         href: '/payment-qrcode',
         icon: QrCode,
+    },
+    {
+        title: 'Feedbacks',
+        href: '/feedbacks',
+        icon: MessageSquare,
     },
     // {
     //     title: 'Guest Information',

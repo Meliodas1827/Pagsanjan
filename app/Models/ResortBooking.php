@@ -9,6 +9,17 @@ class ResortBooking extends Model
     protected $fillable = [
         'booking_id',
         'resort_room_id',
+        'user_booker',
+        'resort_id',
+        'status',
+        'payment_proof',
+        'date_checkin',
+        'date_checkout',
+    ];
+
+    protected $casts = [
+        'date_checkin' => 'date',
+        'date_checkout' => 'date',
     ];
 
     public function booking()
@@ -19,5 +30,15 @@ class ResortBooking extends Model
     public function resortRoom()
     {
         return $this->belongsTo(ResortRoom::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_booker');
+    }
+
+    public function resort()
+    {
+        return $this->belongsTo(Resort::class);
     }
 }
