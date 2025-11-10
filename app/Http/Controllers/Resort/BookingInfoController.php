@@ -1,0 +1,14 @@
+<?php
+
+namespace App\Http\Controllers\Resort;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+
+class BookingInfoController extends Controller
+{
+    public function index (){
+        return Inertia::render('resort/BookingInformation');
+    }
+}
