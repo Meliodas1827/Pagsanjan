@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php artisan tinker:*)",
+      "Bash(php artisan route:list:*)",
+      "Bash(php artisan:*)",
+      "Bash(npm run build:*)",
+      "Bash(php -r \"file_put_contents(''''temp_log.txt'''', file_get_contents(''''storage/logs/laravel.log''''));\")",
+      "Bash(php:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
