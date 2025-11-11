@@ -7,6 +7,9 @@ use App\Models\User;
 use App\Models\BoatBooking;
 use App\Models\Booking;
 use App\Models\Hotel;
+use App\Models\ResortBooking;
+use App\Models\RestoBooking;
+use App\Models\LandingAreaRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -29,6 +32,9 @@ class DashboardController extends Controller
         // Initialize statistics
         $boatReservationStats = [];
         $roomReservationStats = [];
+        $resortReservationStats = [];
+        $restaurantReservationStats = [];
+        $landingAreaReservationStats = [];
         $hotelMonthlyBookings = [];
         $hotelTotalBookings = 0;
         $hotelTotalGuests = 0;
@@ -74,27 +80,83 @@ class DashboardController extends Controller
                 ];
             });
 
+            // Resort reservation statistics per resort
+            $resortReservationStats = ResortBooking::select(
+                'resorts.resort_name',
+                DB::raw('COUNT(resort_bookings.id) as count')
+            )
+            ->join('resorts', 'resort_bookings.resort_id', '=', 'resorts.id')
+            ->whereYear('resort_bookings.date_checkin', date('Y'))
+            ->groupBy('resorts.id', 'resorts.resort_name')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'resort_name' => $item->resort_name,
+                    'count' => $item->count,
+                ];
+            });
+
+            // Restaurant reservation statistics per restaurant
+            $restaurantReservationStats = RestoBooking::select(
+                'resto.resto_name',
+                DB::raw('COUNT(resto_booking.id) as count')
+            )
+            ->join('resto', 'resto_booking.resto_id', '=', 'resto.id')
+            ->whereYear('resto_booking.created_at', date('Y'))
+            ->groupBy('resto.id', 'resto.resto_name')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'restaurant_name' => $item->resto_name,
+                    'count' => $item->count,
+                ];
+            });
+
+            // Landing area reservation statistics per landing area
+            $landingAreaReservationStats = LandingAreaRequest::select(
+                'landing_areas.name',
+                DB::raw('COUNT(landing_area_requests.id) as count')
+            )
+            ->join('landing_areas', 'landing_area_requests.landing_area_id', '=', 'landing_areas.id')
+            ->whereYear('landing_area_requests.pickup_date', date('Y'))
+            ->groupBy('landing_areas.id', 'landing_areas.name')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'landing_area_name' => $item->name,
+                    'count' => $item->count,
+                ];
+            });
+
             // KPI Statistics for Admin
-            // Total Reservations (Boat + Hotel bookings for current year)
+            // Total Reservations (Boat + Hotel + Resort + Restaurant + Landing Area bookings for current year)
             $boatBookingsCount = BoatBooking::whereYear('date_of_booking', date('Y'))->count();
             $hotelBookingsCount = Booking::whereNotNull('hotelid')
                 ->whereYear('check_in_date', date('Y'))
                 ->count();
-            $adminTotalReservations = $boatBookingsCount + $hotelBookingsCount;
+            $resortBookingsCount = ResortBooking::whereYear('date_checkin', date('Y'))->count();
+            $restaurantBookingsCount = RestoBooking::whereYear('created_at', date('Y'))->count();
+            $landingAreaBookingsCount = LandingAreaRequest::whereYear('pickup_date', date('Y'))->count();
+            $adminTotalReservations = $boatBookingsCount + $hotelBookingsCount + $resortBookingsCount + $restaurantBookingsCount + $landingAreaBookingsCount;
 
-            // Total Revenue (Boat + Hotel bookings)
+            // Total Revenue (Boat + Hotel + Resort + Landing Area bookings)
             $boatRevenue = BoatBooking::whereYear('date_of_booking', date('Y'))->sum('total_amount');
             $hotelRevenue = Booking::whereNotNull('hotelid')
                 ->whereYear('check_in_date', date('Y'))
                 ->sum('total_price');
-            $adminTotalRevenue = $boatRevenue + $hotelRevenue;
+            $resortRevenue = ResortBooking::whereYear('date_checkin', date('Y'))->sum('amount');
+            $landingAreaRevenue = LandingAreaRequest::whereYear('pickup_date', date('Y'))->sum('total_amount');
+            $adminTotalRevenue = $boatRevenue + $hotelRevenue + $resortRevenue + $landingAreaRevenue;
 
             // Today's Reservations (created today)
             $todayBoatBookings = BoatBooking::whereDate('created_at', date('Y-m-d'))->count();
             $todayHotelBookings = Booking::whereNotNull('hotelid')
                 ->whereDate('created_at', date('Y-m-d'))
                 ->count();
-            $adminTodayReservations = $todayBoatBookings + $todayHotelBookings;
+            $todayResortBookings = ResortBooking::whereDate('created_at', date('Y-m-d'))->count();
+            $todayRestaurantBookings = RestoBooking::whereDate('created_at', date('Y-m-d'))->count();
+            $todayLandingAreaBookings = LandingAreaRequest::whereDate('created_at', date('Y-m-d'))->count();
+            $adminTodayReservations = $todayBoatBookings + $todayHotelBookings + $todayResortBookings + $todayRestaurantBookings + $todayLandingAreaBookings;
 
             // Today's Check-ins
             $adminTodayCheckIns = Booking::whereNotNull('hotelid')
@@ -183,6 +245,9 @@ class DashboardController extends Controller
             'user' => $user,
             'boatReservationStats' => $boatReservationStats,
             'roomReservationStats' => $roomReservationStats,
+            'resortReservationStats' => $resortReservationStats,
+            'restaurantReservationStats' => $restaurantReservationStats,
+            'landingAreaReservationStats' => $landingAreaReservationStats,
             'hotelMonthlyBookings' => $hotelMonthlyBookings,
             'hotelTotalBookings' => $hotelTotalBookings,
             'hotelTotalGuests' => $hotelTotalGuests,
