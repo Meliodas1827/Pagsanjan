@@ -57,6 +57,11 @@ class Booking extends Model
         return $this->belongsTo(ReservationType::class);
     }
 
+    public function resortBooking()
+    {
+        return $this->hasOne(ResortBooking::class);
+    }
+
     public function resortBookings()
     {
         return $this->hasMany(ResortBooking::class);

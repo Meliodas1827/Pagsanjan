@@ -18,32 +18,32 @@ class ResortBookingsController extends Controller
             return redirect()->back()->with('error', 'No resort assigned to your account');
         }
 
-        // Get bookings for this resort
-        $bookings = Booking::with(['user', 'resortBooking.resortRoom'])
-            ->whereHas('resortBooking.resortRoom', function ($query) use ($resortId) {
+        // Get bookings for this resort using resort_bookings.resort_id
+        $bookings = Booking::with(['user', 'resortBooking.resortRoom', 'resortBooking.user', 'resortBooking.resort'])
+            ->whereHas('resortBooking', function ($query) use ($resortId) {
                 $query->where('resort_id', $resortId);
             })
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
         // Calculate statistics
-        $totalBookings = Booking::whereHas('resortBooking.resortRoom', function ($query) use ($resortId) {
+        $totalBookings = Booking::whereHas('resortBooking', function ($query) use ($resortId) {
             $query->where('resort_id', $resortId);
         })->count();
 
-        $confirmed = Booking::whereHas('resortBooking.resortRoom', function ($query) use ($resortId) {
+        $confirmed = Booking::whereHas('resortBooking', function ($query) use ($resortId) {
             $query->where('resort_id', $resortId);
         })->where('booking_status', 'confirmed')->count();
 
-        $pending = Booking::whereHas('resortBooking.resortRoom', function ($query) use ($resortId) {
+        $pending = Booking::whereHas('resortBooking', function ($query) use ($resortId) {
             $query->where('resort_id', $resortId);
         })->where('booking_status', 'pending')->count();
 
-        $completed = Booking::whereHas('resortBooking.resortRoom', function ($query) use ($resortId) {
+        $completed = Booking::whereHas('resortBooking', function ($query) use ($resortId) {
             $query->where('resort_id', $resortId);
         })->where('booking_status', 'completed')->count();
 
-        $cancelled = Booking::whereHas('resortBooking.resortRoom', function ($query) use ($resortId) {
+        $cancelled = Booking::whereHas('resortBooking', function ($query) use ($resortId) {
             $query->where('resort_id', $resortId);
         })->where('booking_status', 'cancelled')->count();
 

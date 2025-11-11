@@ -836,45 +836,135 @@ const RestaurantSection = ({ restaurants, role }: { restaurants: any[]; role: nu
     );
 };
 
-// Experiences Section Component
-const ExperiencesSection = () => {
+// Resorts Section Component
+const ResortsSection = ({ resorts, role }: { resorts: any[]; role: number }) => {
+    const [currentSlide, setCurrentSlide] = useState(0);
+    const itemsPerSlide = 3;
+    const totalSlides = Math.ceil((resorts?.length || 0) / itemsPerSlide);
+
+    const nextSlide = () => {
+        setCurrentSlide((prev) => (prev + 1) % totalSlides);
+    };
+
+    const prevSlide = () => {
+        setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
+    };
+
+    if (!resorts || resorts.length === 0) {
+        return null;
+    }
+
     return (
-        <section id="resort" className="bg-gray-50 py-20 scroll-mt-16">
+        <section id="resort" className="bg-gradient-to-b from-emerald-50 to-white py-20 scroll-mt-16">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="mb-16 text-center">
-                    <h2 className="mb-4 text-4xl font-light text-gray-900">Resort Experiences</h2>
-                    <p className="text-xl text-gray-600">Discover all the amenities and activities we offer at Pagsanjan Falls Resort</p>
+                <div className="mb-12 text-center">
+                    <h2 className="mb-4 text-4xl font-bold text-gray-900">Stay at Our Resorts</h2>
+                    <p className="mx-auto max-w-3xl text-xl text-gray-600">
+                        Relax and unwind at our beautiful resorts with stunning views and modern amenities
+                    </p>
                 </div>
 
-                <div className="grid gap-8 md:grid-cols-3">
-                    <div className="overflow-hidden rounded-lg bg-white shadow-lg">
-                        <img src="/images/bed.png" alt="Accommodation" className="h-48 w-full object-cover" />
-                        <div className="p-6">
-                            <h3 className="mb-2 text-xl font-semibold">Comfortable Accommodations</h3>
-                            <p className="mb-4 text-gray-600">Stay in our well-appointed rooms and cottages with modern amenities and scenic views</p>
-                            <button className="font-medium text-green-600 hover:text-green-700">Learn More →</button>
+                {/* Carousel Container */}
+                <div className="relative">
+                    {/* Navigation Buttons */}
+                    {totalSlides > 1 && (
+                        <>
+                            <button
+                                onClick={prevSlide}
+                                className="absolute top-1/2 left-0 z-10 -translate-x-4 -translate-y-1/2 rounded-full bg-white p-3 shadow-lg transition-all hover:scale-110 hover:bg-gray-100 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                                aria-label="Previous slide"
+                            >
+                                <svg className="h-6 w-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                            <button
+                                onClick={nextSlide}
+                                className="absolute top-1/2 right-0 z-10 translate-x-4 -translate-y-1/2 rounded-full bg-white p-3 shadow-lg transition-all hover:scale-110 hover:bg-gray-100 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                                aria-label="Next slide"
+                            >
+                                <svg className="h-6 w-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </>
+                    )}
+
+                    {/* Carousel Track */}
+                    <div className="overflow-hidden">
+                        <div
+                            className="flex transition-transform duration-500 ease-in-out"
+                            style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+                        >
+                            {Array.from({ length: totalSlides }).map((_, slideIndex) => (
+                                <div key={slideIndex} className="min-w-full">
+                                    <div className="grid gap-8 px-2 md:grid-cols-2 lg:grid-cols-3">
+                                        {resorts.slice(slideIndex * itemsPerSlide, (slideIndex + 1) * itemsPerSlide).map((resort) => (
+                                            <div
+                                                key={resort.id}
+                                                className="overflow-hidden rounded-lg bg-white shadow-lg transition-all hover:scale-105 hover:shadow-2xl"
+                                            >
+                                                {resort.img ? (
+                                                    <div className="relative h-48 overflow-hidden">
+                                                        <img
+                                                            src={resort.img}
+                                                            alt={resort.resort_name}
+                                                            className="h-full w-full object-cover transition-transform duration-300 hover:scale-110"
+                                                        />
+                                                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex h-48 w-full items-center justify-center bg-gradient-to-br from-emerald-100 to-emerald-200">
+                                                        <svg
+                                                            className="h-16 w-16 text-emerald-600"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            viewBox="0 0 24 24"
+                                                        >
+                                                            <path
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth={2}
+                                                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                                                            />
+                                                        </svg>
+                                                    </div>
+                                                )}
+                                                <div className="p-6">
+                                                    <h3 className="mb-4 text-xl font-semibold text-gray-900">{resort.resort_name}</h3>
+                                                    <p className="mb-4 text-sm text-gray-600">
+                                                        Discover our beautiful resort with stunning views and excellent amenities for your perfect getaway.
+                                                    </p>
+                                                    <Link
+                                                        href={role === 3 ? route('customer.resort.show', { id: resort.id }) : '/login'}
+                                                        className="block w-full rounded-lg bg-gradient-to-r from-emerald-600 to-green-600 px-4 py-3 text-center font-semibold text-white shadow-md transition-all hover:from-emerald-700 hover:to-green-700 hover:shadow-lg"
+                                                    >
+                                                        {role === 3 ? 'Book Now' : 'Login to Book'}
+                                                    </Link>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
 
-                    <div className="overflow-hidden rounded-lg bg-white shadow-lg">
-                        <img src="/images/salmon.png" alt="Dining" className="h-48 w-full object-cover" />
-                        <div className="p-6">
-                            <h3 className="mb-2 text-xl font-semibold">Local Delicacies</h3>
-                            <p className="mb-4 text-gray-600">
-                                Savor authentic Filipino cuisine and fresh seafood at our restaurant overlooking the river
-                            </p>
-                            <button className="font-medium text-green-600 hover:text-green-700">Learn More →</button>
+                    {/* Indicators */}
+                    {totalSlides > 1 && (
+                        <div className="mt-8 flex justify-center gap-2">
+                            {Array.from({ length: totalSlides }).map((_, index) => (
+                                <button
+                                    key={index}
+                                    onClick={() => setCurrentSlide(index)}
+                                    className={`h-3 w-3 rounded-full transition-all ${
+                                        currentSlide === index ? 'w-8 bg-emerald-600' : 'bg-gray-300 hover:bg-gray-400'
+                                    }`}
+                                    aria-label={`Go to slide ${index + 1}`}
+                                />
+                            ))}
                         </div>
-                    </div>
-
-                    <div className="overflow-hidden rounded-lg bg-white shadow-lg">
-                        <SlidingGallery />
-                        <div className="p-6">
-                            <h3 className="mb-2 text-xl font-semibold">Adventure Gallery</h3>
-                            <p className="mb-4 text-gray-600">Explore our collection of exciting activities and memorable moments</p>
-                            <button className="font-medium text-green-600 hover:text-green-700">View Gallery →</button>
-                        </div>
-                    </div>
+                    )}
                 </div>
             </div>
         </section>
@@ -1192,11 +1282,13 @@ const MainComponent = ({
     hotels = [],
     restaurants = [],
     landingAreas = [],
+    resorts = [],
 }: {
     role: number;
     hotels?: any[];
     restaurants?: any[];
     landingAreas?: any[];
+    resorts?: any[];
 }) => {
     // Add smooth scroll behavior
     useEffect(() => {
@@ -1220,7 +1312,7 @@ const MainComponent = ({
                 <BoatToursSection role={role} />
                 <RestaurantSection restaurants={restaurants} role={role} />
                 <LandingAreasSection landingAreas={landingAreas} role={role} />
-                <ExperiencesSection />
+                <ResortsSection resorts={resorts} role={role} />
                 <AccommodationSection />
                 <CallToActionSection />
                 <ContactSection />

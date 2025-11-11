@@ -9,8 +9,9 @@ class ResortRoom extends Model
 {
        use HasFactory;
     protected $fillable = [
+        'resort_id',
         'resort_name',
-        'description',   
+        'description',
         'capacity',
         'price_per_day',
         'image_url',
@@ -25,6 +26,11 @@ class ResortRoom extends Model
         'amenities' => 'array',
         'price_per_day' => 'decimal:2',
     ];
+
+    public function resort()
+    {
+        return $this->belongsTo(Resort::class);
+    }
 
     public function resortBookings()
     {

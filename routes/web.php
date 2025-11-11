@@ -46,6 +46,7 @@ use App\Http\Controllers\Resort\RevenueController;
 use App\Http\Controllers\Resort\ResortBookingsController;
 use App\Http\Controllers\Resort\ResortPaymentQRController;
 use App\Http\Controllers\Resort\ResortEntranceFeeController;
+use App\Http\Controllers\Customer\CustomerResortBookingController;
 use App\Http\Controllers\Shared\DashboardController;
 use App\Http\Controllers\Ubaap\BoatAssignController;
 use App\Http\Controllers\Ubaap\MessageController;
@@ -126,11 +127,25 @@ Route::group([], function () {
                 ];
             });
 
+        $resorts = \App\Models\Resort::where('deleted', 0)
+            ->limit(6)
+            ->get()
+            ->map(function ($resort) {
+                return [
+                    'id' => $resort->id,
+                    'resort_name' => $resort->resort_name,
+                    'img' => $resort->img,
+                    'payment_qr' => $resort->payment_qr,
+                    'deleted' => $resort->deleted,
+                ];
+            });
+
         return Inertia::render('welcome', [
             'hotels' => $hotels,
             'boats' => $boats,
             'restaurants' => $restaurants,
             'landingAreas' => $landingAreas,
+            'resorts' => $resorts,
         ]);
     })->name('home');
 
@@ -363,6 +378,10 @@ Route::middleware(['auth', 'verified', 'guest-profile', 'role:admin,resort,custo
     Route::get('my-bookings', [CustomerBookingController::class, 'myBookingPage'])->name('my.bookings');
     Route::get('my-booking-details', [CustomerBookingController::class, 'myBookingDetails'])->name('my.booking-details');
     Route::get('manage-my-bookings', [CustomerBookingController::class, 'manageMyBookings'])->name('manage. my-bookings');
+
+    // Resort Booking
+    Route::get('resort/{id}', [CustomerResortBookingController::class, 'show'])->name('customer.resort.show');
+    Route::post('resort/book', [CustomerResortBookingController::class, 'book'])->name('customer.resort.book');
 
     // room dashboard
     Route::get('room-booking/{id}', [RoomBookingController::class, 'show'])->name('room.booking');

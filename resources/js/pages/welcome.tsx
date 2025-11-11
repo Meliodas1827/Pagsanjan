@@ -12,6 +12,7 @@ type PageProps = {
     boats: any[];
     restaurants: any[];
     landingAreas: any[];
+    resorts: any[];
 };
 
 export default function Welcome() {
@@ -22,6 +23,7 @@ export default function Welcome() {
     const boats = props.boats || [];
     const restaurants = props.restaurants || [];
     const landingAreas = props.landingAreas || [];
+    const resorts = props.resorts || [];
     const [open, setOpen] = useState(false);
     const [shown, setShown] = useState(false); // track if modal was already shown
 
@@ -50,7 +52,7 @@ export default function Welcome() {
             />
 
             {/* <PublicNavBar role={user} /> */}
-            <MainComponent role={user} hotels={hotels} boats={boats} restaurants={restaurants} landingAreas={landingAreas} />
+            <MainComponent role={user} hotels={hotels} boats={boats} restaurants={restaurants} landingAreas={landingAreas} resorts={resorts} />
         </>
     );
 }
