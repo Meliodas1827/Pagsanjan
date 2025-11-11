@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class ResortBooking extends Model
 {
     protected $fillable = [
-        'booking_id',
         'resort_room_id',
         'user_booker',
         'resort_id',
@@ -15,6 +14,11 @@ class ResortBooking extends Model
         'payment_proof',
         'date_checkin',
         'date_checkout',
+        'adults',
+        'children',
+        'pwd',
+        'senior',
+        'amount',
     ];
 
     protected $casts = [

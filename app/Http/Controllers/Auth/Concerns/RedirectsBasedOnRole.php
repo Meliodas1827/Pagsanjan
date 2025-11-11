@@ -17,7 +17,7 @@ trait RedirectsBasedOnRole
         return match ($user->role_id) {
             1 => '/dashboard',                  // Admin
             3 => '/welcome',                    // Customer
-            4 => '/resort-schedule',            // Resort
+            4 => '/resort-bookings',            // Resort
             5 => '/ubaap-dashboard',            // UBAAP (Boat operator)
             6 => '/booking-management',         // Hotel
             7 => '/restaurant-portal',          // Restaurant

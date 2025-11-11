@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Boat;
 use App\Models\BoatBooking;
 use App\Models\Booking;
+use App\Models\Feedback;
 use App\Models\Guest;
 use App\Models\Payment;
 use App\Models\ResortBooking;
@@ -20,8 +21,10 @@ class CustomerBookingController extends Controller
 {
     public function myBookingPage(Request $request)
     {
-        $guestId = $request->user()->id;
-        $resortBookings = Booking::select([
+        $userId = $request->user()->id;
+
+        // Get hotel bookings (from bookings table)
+        $hotelBookings = Booking::select([
             'id',
             'reference_id',
             'booking_status',
@@ -31,13 +34,13 @@ class CustomerBookingController extends Controller
             'created_at',
             'no_of_adults',
             'no_of_children'
-
         ])
-            ->where('userid', $guestId)
+            ->where('userid', $userId)
+            ->whereNotNull('hotelid')
             ->get();
 
-        // Add expiration info for each booking
-        foreach ($resortBookings as $booking) {
+        // Add expiration info for each hotel booking
+        foreach ($hotelBookings as $booking) {
             $bookingCreatedAt = Carbon::parse($booking->created_at);
             $bookingScheduleDate = Carbon::parse($booking->check_in_date);
             $now = Carbon::now();
@@ -67,6 +70,22 @@ class CustomerBookingController extends Controller
 
             $booking->expiration_time = $expirationTime->format('Y-m-d H:i:s');
         }
+
+        // Get resort bookings (from resort_bookings table)
+        $resortBookings = ResortBooking::select([
+            'resort_bookings.id',
+            'resort_bookings.status',
+            'resort_bookings.date_checkin',
+            'resort_bookings.date_checkout',
+            'resort_bookings.payment_proof',
+            'resort_bookings.created_at',
+            'resorts.resort_name',
+            'resorts.img as resort_image'
+        ])
+            ->leftJoin('resorts', 'resorts.id', '=', 'resort_bookings.resort_id')
+            ->where('resort_bookings.user_booker', $userId)
+            ->orderBy('resort_bookings.created_at', 'desc')
+            ->get();
 
 
         $boatBookingInformation = BoatBooking::select(
@@ -100,7 +119,46 @@ class CustomerBookingController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        // Get all feedbacks for this user to check which bookings already have feedback
+        $userFeedbacks = Feedback::where('user_id', $userId)
+            ->get()
+            ->keyBy(function ($feedback) {
+                return $feedback->category . '_' . $feedback->booking_id;
+            });
+
+        // Add feedback status to each booking type
+        foreach ($hotelBookings as $booking) {
+            $feedbackKey = 'hotel_' . $booking->id;
+            $booking->has_feedback = isset($userFeedbacks[$feedbackKey]);
+            $booking->feedback = $userFeedbacks[$feedbackKey] ?? null;
+        }
+
+        foreach ($resortBookings as $booking) {
+            $feedbackKey = 'resort_' . $booking->id;
+            $booking->has_feedback = isset($userFeedbacks[$feedbackKey]);
+            $booking->feedback = $userFeedbacks[$feedbackKey] ?? null;
+        }
+
+        foreach ($boatBookingInformation as $booking) {
+            $feedbackKey = 'ubaap_' . $booking->id;
+            $booking->has_feedback = isset($userFeedbacks[$feedbackKey]);
+            $booking->feedback = $userFeedbacks[$feedbackKey] ?? null;
+        }
+
+        foreach ($restaurantBookings as $booking) {
+            $feedbackKey = 'restaurant_' . $booking->id;
+            $booking->has_feedback = isset($userFeedbacks[$feedbackKey]);
+            $booking->feedback = $userFeedbacks[$feedbackKey] ?? null;
+        }
+
+        foreach ($landingAreaBookings as $booking) {
+            $feedbackKey = 'landing_area_' . $booking->id;
+            $booking->has_feedback = isset($userFeedbacks[$feedbackKey]);
+            $booking->feedback = $userFeedbacks[$feedbackKey] ?? null;
+        }
+
         return Inertia::render('customer/BookingPage', [
+            'hotelbookings' => $hotelBookings,
             'resortbookings' => $resortBookings,
             'boat_ride_data' => $boatBookingInformation,
             'restaurantBookings' => $restaurantBookings,

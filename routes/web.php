@@ -187,6 +187,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::put('manage-users/{user}', [ManageUserController::class, 'update'])->name('manage-users.update');
     Route::delete('manage-users/{user}', [ManageUserController::class, 'destroy'])->name('manage-users.destroy');
 
+    // Admin Feedback Report
+    Route::get('admin/feedback-report', [FeedbackReportController::class, 'index'])->name('admin.feedback-report');
+
     Route::get('reservation', [ReservationController::class, 'index']);
     Route::get('api/reservation', [ReservationController::class, 'getReservationData']);
 
@@ -282,16 +285,21 @@ Route::middleware(['auth', 'verified', 'role:resort'])->group(function () {
 
     // New Resort Pages
     Route::get('resort-bookings', [ResortBookingsController::class, 'index'])->name('resort.bookings');
+    Route::put('resort-bookings/{id}/status', [ResortBookingsController::class, 'updateStatus'])->name('resort.bookings.update-status');
     Route::get('resort-payment-qr', [ResortPaymentQRController::class, 'index'])->name('resort.payment-qr');
     Route::post('resort/{resort}/qrcode', [ResortPaymentQRController::class, 'updateQrCode'])->name('resort.update-qrcode');
     Route::get('resort-entrance-fee', [ResortEntranceFeeController::class, 'index'])->name('resort.entrance-fee');
     Route::put('resort/entrance-fee/{fee}', [ResortEntranceFeeController::class, 'update'])->name('resort.entrance-fee.update');
 });
 
-// Feedbacks - accessible to all roles
+// Feedbacks - accessible to all authenticated users
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::post('feedbacks', [\App\Http\Controllers\FeedbackController::class, 'store'])->name('feedbacks.store');
+});
+
+// Feedbacks - viewing restricted to specific roles
 Route::middleware(['auth', 'verified', 'role:admin,resort,ubaap,hotel,restaurant,landing_area'])->group(function () {
     Route::get('feedbacks', [\App\Http\Controllers\FeedbackController::class, 'index'])->name('feedbacks.index');
-    Route::post('feedbacks', [\App\Http\Controllers\FeedbackController::class, 'store'])->name('feedbacks.store');
     Route::delete('feedbacks/{feedback}', [\App\Http\Controllers\FeedbackController::class, 'destroy'])->name('feedbacks.destroy');
 });
 

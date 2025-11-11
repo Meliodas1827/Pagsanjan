@@ -1,7 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { usePage } from '@inertiajs/react';
-import { Calendar, Users, UtensilsCrossed, Clock } from 'lucide-react';
+import { Calendar, Users, UtensilsCrossed, Clock, MessageSquare, Star } from 'lucide-react';
+import { useState } from 'react';
+import { FeedbackDialog } from './feedback-dialog';
 
 interface RestaurantBooking {
     id: number;
@@ -10,6 +13,8 @@ interface RestaurantBooking {
     is_book_confirmed: boolean;
     no_of_guest: number;
     created_at: string;
+    has_feedback?: boolean;
+    feedback?: any;
     resto: {
         id: number;
         resto_name: string;
@@ -29,6 +34,16 @@ interface PageProps {
 export default function RestaurantBookingCard() {
     const { props } = usePage<PageProps>();
     const bookings = props.restaurantBookings || [];
+
+    const [feedbackDialog, setFeedbackDialog] = useState<{
+        open: boolean;
+        bookingId: number;
+        existingFeedback?: any;
+    }>({
+        open: false,
+        bookingId: 0,
+        existingFeedback: null,
+    });
 
     const getStatusColor = (confirmed: boolean) => {
         return confirmed
@@ -117,10 +132,51 @@ export default function RestaurantBookingCard() {
                                     </span>
                                 </div>
                             </div>
+
+                            {/* Feedback Button */}
+                            <div className='mt-3 pt-3 border-t border-gray-200'>
+                                <Button
+                                    size="sm"
+                                    variant={booking.has_feedback ? 'outline' : 'default'}
+                                    onClick={() =>
+                                        setFeedbackDialog({
+                                            open: true,
+                                            bookingId: booking.id,
+                                            existingFeedback: booking.feedback,
+                                        })
+                                    }
+                                    className="w-full"
+                                >
+                                    {booking.has_feedback ? (
+                                        <>
+                                            <Star className="mr-1 h-3 w-3 fill-yellow-400" />
+                                            View Feedback
+                                        </>
+                                    ) : (
+                                        <>
+                                            <MessageSquare className="mr-1 h-3 w-3" />
+                                            Leave Feedback
+                                        </>
+                                    )}
+                                </Button>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
             ))}
+
+            <FeedbackDialog
+                open={feedbackDialog.open}
+                onOpenChange={(open) =>
+                    setFeedbackDialog((prev) => ({
+                        ...prev,
+                        open,
+                    }))
+                }
+                bookingId={feedbackDialog.bookingId}
+                category="restaurant"
+                existingFeedback={feedbackDialog.existingFeedback}
+            />
         </div>
     );
 }

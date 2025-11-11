@@ -2,10 +2,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { Star, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 
 interface Feedback {
@@ -35,6 +37,7 @@ interface PageProps {
         distribution: Record<number, number>;
     };
     category: string | null;
+    isAdmin: boolean;
     auth: {
         user: {
             role: string;
@@ -45,7 +48,15 @@ interface PageProps {
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Feedbacks', href: '/feedbacks' }];
 
 export default function Feedbacks() {
-    const { feedbacks, statistics, category, auth } = usePage<PageProps>().props;
+    const { feedbacks, statistics, category, isAdmin, auth } = usePage<PageProps>().props;
+
+    const handleCategoryChange = (newCategory: string | null) => {
+        if (newCategory) {
+            router.get(route('feedbacks.index'), { category: newCategory }, { preserveState: true });
+        } else {
+            router.get(route('feedbacks.index'), {}, { preserveState: true });
+        }
+    };
 
     const getCategoryBadgeColor = (cat: string) => {
         switch (cat) {
@@ -110,8 +121,33 @@ export default function Feedbacks() {
 
             <div className="mx-4 my-4">
                 <h1 className="text-2xl font-semibold">Customer Feedbacks</h1>
-                <p className="text-muted-foreground">{category ? `Viewing ${getCategoryLabel(category)} feedbacks` : 'Viewing all feedbacks'}</p>
+                <p className="text-muted-foreground">View and manage customer feedback</p>
             </div>
+
+            {/* Category Filter Tabs for Admin */}
+            {isAdmin && (
+                <div className="mx-4 mb-4">
+                    <Tabs value={category || 'all'} onValueChange={(value) => handleCategoryChange(value === 'all' ? null : value)}>
+                        <TabsList>
+                            <TabsTrigger value="all">All Categories</TabsTrigger>
+                            <TabsTrigger value="resort">Resort</TabsTrigger>
+                            <TabsTrigger value="hotel">Hotel</TabsTrigger>
+                            <TabsTrigger value="ubaap">UBAAP</TabsTrigger>
+                            <TabsTrigger value="restaurant">Restaurant</TabsTrigger>
+                            <TabsTrigger value="landing_area">Landing Area</TabsTrigger>
+                        </TabsList>
+                    </Tabs>
+                </div>
+            )}
+
+            {/* Current Filter Display */}
+            {!isAdmin && category && (
+                <div className="mx-4 mb-4">
+                    <Badge variant="outline" className="text-sm">
+                        Viewing: {getCategoryLabel(category)}
+                    </Badge>
+                </div>
+            )}
 
             {/* Statistics Cards */}
             <div className="mx-4 mb-4 grid gap-4 md:grid-cols-3">

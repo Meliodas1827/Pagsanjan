@@ -1,5 +1,5 @@
 import { NavItem } from '@/types';
-import { CalendarCog, ChefHat, Hotel, LayoutGrid, Mail, MapPin, MountainSnow, SailboatIcon, UserRoundPen } from 'lucide-react';
+import { CalendarCog, ChefHat, Hotel, LayoutGrid, Mail, MapPin, MessageSquare, MountainSnow, SailboatIcon, UserRoundPen } from 'lucide-react';
 import { NavMain } from '../nav-main';
 import { SidebarContent } from '../ui/sidebar';
 
@@ -47,13 +47,13 @@ const Ubaap: NavItem[] = [
     },
 ];
 
-// const other: NavItem[] = [
-//     {
-//         title: 'Feedback',
-//         href: '/feedback',
-//         icon: Star,
-//     },
-// ];
+const other: NavItem[] = [
+    {
+        title: 'Feedback Report',
+        href: '/admin/feedback-report',
+        icon: MessageSquare,
+    },
+];
 
 const settings: NavItem[] = [
     {
@@ -96,8 +96,8 @@ export default function AdminSideBar() {
             {/* <NavMain items={reportItems} subtitle="Reports" /> */}
             <hr />
             <NavMain items={Ubaap} subtitle="UBAAP" />
-            {/* <hr /> */}
-            {/* <NavMain items={other} subtitle="Other" /> */}
+            <hr />
+            <NavMain items={other} subtitle="Other" />
             <hr />
             <NavMain items={settings} subtitle="Settings" />
         </SidebarContent>

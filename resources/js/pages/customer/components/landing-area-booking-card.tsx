@@ -1,7 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { usePage } from '@inertiajs/react';
-import { Calendar, Users, Sailboat, Clock, MapPin } from 'lucide-react';
+import { Calendar, Users, Sailboat, Clock, MapPin, MessageSquare, Star } from 'lucide-react';
+import { useState } from 'react';
+import { FeedbackDialog } from './feedback-dialog';
 
 interface LandingAreaBooking {
     id: number;
@@ -13,6 +16,8 @@ interface LandingAreaBooking {
     status: string;
     is_confirmed: boolean;
     created_at: string;
+    has_feedback?: boolean;
+    feedback?: any;
     landing_area: {
         id: number;
         name: string;
@@ -29,6 +34,16 @@ interface PageProps {
 export default function LandingAreaBookingCard() {
     const { props } = usePage<PageProps>();
     const bookings = props.landingAreaBookings || [];
+
+    const [feedbackDialog, setFeedbackDialog] = useState<{
+        open: boolean;
+        bookingId: number;
+        existingFeedback?: any;
+    }>({
+        open: false,
+        bookingId: 0,
+        existingFeedback: null,
+    });
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -140,10 +155,53 @@ export default function LandingAreaBookingCard() {
                                     </div>
                                 </div>
                             )}
+
+                            {/* Feedback Button */}
+                            {booking.status !== 'pending' && booking.status !== 'cancelled' && (
+                                <div className='mt-3 pt-3 border-t border-gray-200'>
+                                    <Button
+                                        size="sm"
+                                        variant={booking.has_feedback ? 'outline' : 'default'}
+                                        onClick={() =>
+                                            setFeedbackDialog({
+                                                open: true,
+                                                bookingId: booking.id,
+                                                existingFeedback: booking.feedback,
+                                            })
+                                        }
+                                        className="w-full"
+                                    >
+                                        {booking.has_feedback ? (
+                                            <>
+                                                <Star className="mr-1 h-3 w-3 fill-yellow-400" />
+                                                View Feedback
+                                            </>
+                                        ) : (
+                                            <>
+                                                <MessageSquare className="mr-1 h-3 w-3" />
+                                                Leave Feedback
+                                            </>
+                                        )}
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                     </CardContent>
                 </Card>
             ))}
+
+            <FeedbackDialog
+                open={feedbackDialog.open}
+                onOpenChange={(open) =>
+                    setFeedbackDialog((prev) => ({
+                        ...prev,
+                        open,
+                    }))
+                }
+                bookingId={feedbackDialog.bookingId}
+                category="landing_area"
+                existingFeedback={feedbackDialog.existingFeedback}
+            />
         </div>
     );
 }

@@ -1,11 +1,14 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { Calendar, Users } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface Booking {
     id: number;
@@ -16,9 +19,14 @@ interface Booking {
     };
     check_in: string;
     check_out: string;
+    adults: number;
+    children: number;
+    pwd: number;
+    senior: number;
     total_guests: number;
     total_amount: number;
     booking_status: string;
+    status: string;
     created_at: string;
 }
 
@@ -43,15 +51,36 @@ const breadcrumbs: BreadcrumbItem[] = [{ title: 'Bookings', href: '/resort-booki
 
 export default function ResortBookings() {
     const { bookings, statistics } = usePage<PageProps>().props;
+    const [updatingStatus, setUpdatingStatus] = useState<number | null>(null);
+
+    const handleStatusUpdate = (bookingId: number, newStatus: string) => {
+        setUpdatingStatus(bookingId);
+
+        router.put(
+            `/resort-bookings/${bookingId}/status`,
+            { status: newStatus },
+            {
+                onSuccess: () => {
+                    toast.success('Booking status updated successfully');
+                    setUpdatingStatus(null);
+                },
+                onError: (errors) => {
+                    console.error(errors);
+                    toast.error('Failed to update status');
+                    setUpdatingStatus(null);
+                },
+            }
+        );
+    };
 
     const getStatusColor = (status: string) => {
         switch (status.toLowerCase()) {
-            case 'confirmed':
+            case 'accepted':
                 return 'default';
             case 'pending':
                 return 'secondary';
-            case 'completed':
-                return 'default';
+            case 'declined':
+                return 'destructive';
             case 'cancelled':
                 return 'destructive';
             default:
@@ -142,9 +171,10 @@ export default function ResortBookings() {
                                     <TableHead>Guest</TableHead>
                                     <TableHead>Check In</TableHead>
                                     <TableHead>Check Out</TableHead>
-                                    <TableHead>Guests</TableHead>
+                                    <TableHead>Guest Details</TableHead>
                                     <TableHead>Amount</TableHead>
                                     <TableHead>Status</TableHead>
+                                    <TableHead>Action</TableHead>
                                     <TableHead>Booked Date</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -172,21 +202,44 @@ export default function ResortBookings() {
                                                 </div>
                                             </TableCell>
                                             <TableCell>
-                                                <div className="flex items-center gap-1">
-                                                    <Users className="h-4 w-4 text-muted-foreground" />
-                                                    {booking.total_guests}
+                                                <div className="space-y-1 text-xs">
+                                                    <div className="flex items-center gap-1">
+                                                        <Users className="h-3 w-3 text-muted-foreground" />
+                                                        <span className="font-medium">Total: {booking.total_guests}</span>
+                                                    </div>
+                                                    {booking.adults > 0 && <div>Adults: {booking.adults}</div>}
+                                                    {booking.children > 0 && <div>Children: {booking.children}</div>}
+                                                    {booking.pwd > 0 && <div>PWD: {booking.pwd}</div>}
+                                                    {booking.senior > 0 && <div>Senior: {booking.senior}</div>}
                                                 </div>
                                             </TableCell>
                                             <TableCell className="font-medium">{formatCurrency(booking.total_amount)}</TableCell>
                                             <TableCell>
                                                 <Badge variant={getStatusColor(booking.booking_status)}>{booking.booking_status}</Badge>
                                             </TableCell>
+                                            <TableCell>
+                                                <Select
+                                                    value={booking.status}
+                                                    onValueChange={(value) => handleStatusUpdate(booking.id, value)}
+                                                    disabled={updatingStatus === booking.id}
+                                                >
+                                                    <SelectTrigger className="w-32">
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="pending">Pending</SelectItem>
+                                                        <SelectItem value="accepted">Accepted</SelectItem>
+                                                        <SelectItem value="declined">Declined</SelectItem>
+                                                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </TableCell>
                                             <TableCell>{formatDate(booking.created_at)}</TableCell>
                                         </TableRow>
                                     ))
                                 ) : (
                                     <TableRow>
-                                        <TableCell colSpan={8} className="text-center text-muted-foreground">
+                                        <TableCell colSpan={9} className="text-center text-muted-foreground">
                                             No bookings yet
                                         </TableCell>
                                     </TableRow>

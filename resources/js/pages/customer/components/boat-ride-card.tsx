@@ -1,13 +1,26 @@
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
-import { Sailboat, Clock, Users, PhilippinePeso, Calendar } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Sailboat, Clock, Users, PhilippinePeso, Calendar, MessageSquare, Star } from 'lucide-react';
 import BoatRideBadge from './boat-ride-badge';
 import { usePage } from '@inertiajs/react';
 import { BookingProps } from '../types/view-details';
+import { useState } from 'react';
+import { FeedbackDialog } from './feedback-dialog';
 
 const BoatBookingCard = () => {
     const { props } = usePage<BookingProps>();
     const bookingsData = props.boat_ride_data;
     console.log(bookingsData);
+
+    const [feedbackDialog, setFeedbackDialog] = useState<{
+        open: boolean;
+        bookingId: number;
+        existingFeedback?: any;
+    }>({
+        open: false,
+        bookingId: 0,
+        existingFeedback: null,
+    });
 
     if(!bookingsData || bookingsData.length === 0){
         return (
@@ -142,10 +155,53 @@ const BoatBookingCard = () => {
                             <p className='mt-3 text-slate-600 text-xs bg-yellow-50 p-2 rounded border-l-4 border-yellow-400'>
                                 <strong>Note:</strong> Boat ride payment will be available after check-in of the guests to their respective accommodation (walk-in payment).
                             </p>
+
+                            {/* Feedback Button */}
+                            {status !== 'pending' && status !== 'declined' && (
+                                <div className='mt-3'>
+                                    <Button
+                                        size="sm"
+                                        variant={booking.has_feedback ? 'outline' : 'default'}
+                                        onClick={() =>
+                                            setFeedbackDialog({
+                                                open: true,
+                                                bookingId: booking.id,
+                                                existingFeedback: booking.feedback,
+                                            })
+                                        }
+                                        className="w-full"
+                                    >
+                                        {booking.has_feedback ? (
+                                            <>
+                                                <Star className="mr-1 h-3 w-3 fill-yellow-400" />
+                                                View Feedback
+                                            </>
+                                        ) : (
+                                            <>
+                                                <MessageSquare className="mr-1 h-3 w-3" />
+                                                Leave Feedback
+                                            </>
+                                        )}
+                                    </Button>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 );
             })}
+
+            <FeedbackDialog
+                open={feedbackDialog.open}
+                onOpenChange={(open) =>
+                    setFeedbackDialog((prev) => ({
+                        ...prev,
+                        open,
+                    }))
+                }
+                bookingId={feedbackDialog.bookingId}
+                category="ubaap"
+                existingFeedback={feedbackDialog.existingFeedback}
+            />
         </div>
     );
 };

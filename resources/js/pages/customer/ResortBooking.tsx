@@ -166,12 +166,22 @@ export default function ResortBooking() {
 
         setIsSubmitting(true);
 
+        // Extract guest counts by category
+        const adults = guests['Adult'] || 0;
+        const children = guests['Children'] || 0;
+        const pwd = guests['PWD'] || 0;
+        const senior = guests['Senior'] || 0;
+
         const formData = new FormData();
         formData.append('resort_id', resort.id.toString());
         formData.append('date_checkin', checkInDate);
         formData.append('date_checkout', checkOutDate);
         formData.append('guests', JSON.stringify(guests));
         formData.append('total_amount', totalAmount.toString());
+        formData.append('adults', adults.toString());
+        formData.append('children', children.toString());
+        formData.append('pwd', pwd.toString());
+        formData.append('senior', senior.toString());
         formData.append('payment_proof', paymentProof);
 
         router.post(route('customer.resort.book'), formData, {
