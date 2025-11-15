@@ -18,6 +18,8 @@ class RestaurantBookingController extends Controller
     {
         $restaurant = Resto::with(['restoTables' => function ($query) {
             $query->where('deleted', 0);
+        }, 'images' => function($query) {
+            $query->orderBy('order');
         }])->findOrFail($id);
 
         if ($restaurant->deleted == 1) {
@@ -46,6 +48,7 @@ class RestaurantBookingController extends Controller
                 'available_tables_count' => $activeTables->where('status', 'available')->count(),
                 'total_capacity' => $activeTables->sum('no_of_chairs'),
             ],
+            'resto_images' => $restaurant->images,
         ]);
     }
 

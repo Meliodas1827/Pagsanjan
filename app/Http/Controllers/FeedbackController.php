@@ -56,11 +56,11 @@ class FeedbackController extends Controller
                     break;
 
                 case 'restaurant':
-                    // Join with resto_bookings and filter by user's restoid
-                    $query->join('resto_bookings', function($join) use ($user) {
-                        $join->on('feedbacks.booking_id', '=', 'resto_bookings.id')
+                    // Join with resto_booking and filter by user's restoid
+                    $query->join('resto_booking', function($join) use ($user) {
+                        $join->on('feedbacks.booking_id', '=', 'resto_booking.id')
                              ->where('feedbacks.category', '=', 'restaurant')
-                             ->where('resto_bookings.resto_id', '=', $user->restoid);
+                             ->where('resto_booking.resto_id', '=', $user->restoid);
                     });
                     break;
 
@@ -107,10 +107,10 @@ class FeedbackController extends Controller
                     });
                     break;
                 case 'restaurant':
-                    $statsQuery->join('resto_bookings', function($join) use ($user) {
-                        $join->on('feedbacks.booking_id', '=', 'resto_bookings.id')
+                    $statsQuery->join('resto_booking', function($join) use ($user) {
+                        $join->on('feedbacks.booking_id', '=', 'resto_booking.id')
                              ->where('feedbacks.category', '=', 'restaurant')
-                             ->where('resto_bookings.resto_id', '=', $user->restoid);
+                             ->where('resto_booking.resto_id', '=', $user->restoid);
                     });
                     break;
                 case 'landing_area':

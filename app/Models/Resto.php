@@ -31,6 +31,16 @@ class Resto extends Model
         return $this->hasMany(RestoBooking::class, 'resto_id');
     }
 
+    public function images()
+    {
+        return $this->hasMany(RestoImage::class, 'resto_id')->orderBy('order');
+    }
+
+    public function primaryImage()
+    {
+        return $this->hasOne(RestoImage::class, 'resto_id')->where('is_primary', true);
+    }
+
     public static function getRestos()
     {
         return self::with('restoTables')->get();

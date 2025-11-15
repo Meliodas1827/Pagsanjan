@@ -1,5 +1,5 @@
 import { NavItem } from '@/types';
-import { LayoutGrid, MessageSquare, QrCode } from 'lucide-react';
+import { ImageIcon, LayoutGrid, MessageSquare, QrCode } from 'lucide-react';
 import { NavMain } from '../nav-main';
 import { SidebarContent } from '../ui/sidebar';
 
@@ -13,6 +13,11 @@ const mainNavItems: NavItem[] = [
         title: 'Customer Requests',
         href: '/landing-area-requests',
         icon: MessageSquare,
+    },
+    {
+        title: 'Landing Area Images',
+        href: '/landing-area-images',
+        icon: ImageIcon,
     },
     {
         title: 'Payment QR',

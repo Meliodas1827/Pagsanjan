@@ -31,6 +31,7 @@ use App\Http\Controllers\Admin\HotelController;
 use App\Http\Controllers\Admin\ResortController;
 use App\Http\Controllers\Admin\RestaurantController;
 use App\Http\Controllers\Restaurant\RestaurantPortalController;
+use App\Http\Controllers\Restaurant\RestoImageController;
 use App\Http\Controllers\Landing\LandingFormsController;
 use App\Http\Controllers\Customer\HotelDetailsController;
 use App\Http\Controllers\Customer\RoomBookingController;
@@ -46,14 +47,17 @@ use App\Http\Controllers\Resort\RevenueController;
 use App\Http\Controllers\Resort\ResortBookingsController;
 use App\Http\Controllers\Resort\ResortPaymentQRController;
 use App\Http\Controllers\Resort\ResortEntranceFeeController;
+use App\Http\Controllers\Resort\ResortImageController;
 use App\Http\Controllers\Customer\CustomerResortBookingController;
 use App\Http\Controllers\Shared\DashboardController;
 use App\Http\Controllers\Ubaap\BoatAssignController;
 use App\Http\Controllers\Ubaap\MessageController;
 use App\Http\Controllers\Ubaap\UbaapScheduleController;
+use App\Http\Controllers\Ubaap\BoatImageController;
 use App\Http\Controllers\LandingAreaAdmin\DashboardController as LandingAreaDashboardController;
 use App\Http\Controllers\LandingAreaAdmin\CustomerRequestController;
 use App\Http\Controllers\LandingAreaAdmin\PaymentQRController;
+use App\Http\Controllers\LandingAreaAdmin\LandingAreaImageController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -272,6 +276,13 @@ Route::middleware(['auth', 'verified', 'role:ubaap'])->group(function () {
     Route::get('ubaap-landing-area-requests', [\App\Http\Controllers\Ubaap\LandingAreaRequestController::class, 'index'])->name('ubaap.landing-area-requests');
     Route::post('ubaap-landing-area-requests/{landingAreaRequest}/assign-boat', [\App\Http\Controllers\Ubaap\LandingAreaRequestController::class, 'assignBoat'])->name('ubaap.landing-area-requests.assign-boat');
     Route::put('ubaap-landing-area-requests/{landingAreaRequest}/status', [\App\Http\Controllers\Ubaap\LandingAreaRequestController::class, 'updateStatus'])->name('ubaap.landing-area-requests.update-status');
+
+    // Boat Images
+    Route::get('boat-images', [BoatImageController::class, 'index'])->name('ubaap.boat-images');
+    Route::post('boat-images', [BoatImageController::class, 'store'])->name('ubaap.boat-images.store');
+    Route::put('boat-images/{image}', [BoatImageController::class, 'update'])->name('ubaap.boat-images.update');
+    Route::delete('boat-images/{image}', [BoatImageController::class, 'destroy'])->name('ubaap.boat-images.destroy');
+    Route::post('boat-images/reorder', [BoatImageController::class, 'reorder'])->name('ubaap.boat-images.reorder');
 });
 
 // resort
@@ -290,6 +301,13 @@ Route::middleware(['auth', 'verified', 'role:resort'])->group(function () {
     Route::post('resort/{resort}/qrcode', [ResortPaymentQRController::class, 'updateQrCode'])->name('resort.update-qrcode');
     Route::get('resort-entrance-fee', [ResortEntranceFeeController::class, 'index'])->name('resort.entrance-fee');
     Route::put('resort/entrance-fee/{fee}', [ResortEntranceFeeController::class, 'update'])->name('resort.entrance-fee.update');
+
+    // Resort Images
+    Route::get('resort-images', [ResortImageController::class, 'index'])->name('resort.images');
+    Route::post('resort-images', [ResortImageController::class, 'store'])->name('resort.images.store');
+    Route::put('resort-images/{image}', [ResortImageController::class, 'update'])->name('resort.images.update');
+    Route::delete('resort-images/{image}', [ResortImageController::class, 'destroy'])->name('resort.images.destroy');
+    Route::post('resort-images/reorder', [ResortImageController::class, 'reorder'])->name('resort.images.reorder');
 });
 
 // Feedbacks - accessible to all authenticated users
@@ -311,6 +329,13 @@ Route::middleware(['auth', 'verified', 'role:landing_area'])->group(function () 
     Route::get('landing-area-payment-qr', [PaymentQRController::class, 'index'])->name('landing-area.payment-qr');
     Route::post('landing-area-payment-qr/upload', [PaymentQRController::class, 'upload'])->name('landing-area.payment-qr.upload');
     Route::delete('landing-area-payment-qr/delete', [PaymentQRController::class, 'delete'])->name('landing-area.payment-qr.delete');
+
+    // Landing Area Images
+    Route::get('landing-area-images', [LandingAreaImageController::class, 'index'])->name('landing-area.images');
+    Route::post('landing-area-images', [LandingAreaImageController::class, 'store'])->name('landing-area.images.store');
+    Route::put('landing-area-images/{image}', [LandingAreaImageController::class, 'update'])->name('landing-area.images.update');
+    Route::delete('landing-area-images/{image}', [LandingAreaImageController::class, 'destroy'])->name('landing-area.images.destroy');
+    Route::post('landing-area-images/reorder', [LandingAreaImageController::class, 'reorder'])->name('landing-area.images.reorder');
 });
 
 // restaurant portal
@@ -328,6 +353,13 @@ Route::middleware(['auth', 'verified', 'role:restaurant'])->group(function () {
     Route::get('restaurant-bookings', [RestaurantPortalController::class, 'bookings'])->name('restaurant-bookings.index');
     Route::post('restaurant-bookings/{booking}/confirm', [RestaurantPortalController::class, 'confirmBooking'])->name('restaurant-bookings.confirm');
     Route::delete('restaurant-bookings/{booking}', [RestaurantPortalController::class, 'cancelBooking'])->name('restaurant-bookings.cancel');
+
+    // Restaurant Images
+    Route::get('resto-images', [RestoImageController::class, 'index'])->name('restaurant.images');
+    Route::post('resto-images', [RestoImageController::class, 'store'])->name('restaurant.images.store');
+    Route::put('resto-images/{image}', [RestoImageController::class, 'update'])->name('restaurant.images.update');
+    Route::delete('resto-images/{image}', [RestoImageController::class, 'destroy'])->name('restaurant.images.destroy');
+    Route::post('resto-images/reorder', [RestoImageController::class, 'reorder'])->name('restaurant.images.reorder');
 });
 
 // Message route

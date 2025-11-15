@@ -16,6 +16,11 @@ class BoatBookingController extends Controller
 {
     public function show(Boat $boat)
     {
+        // Load images relationship
+        $boat->load(['images' => function($query) {
+            $query->orderBy('order');
+        }]);
+
         // Get booked dates for the boat
         $bookedDates = BoatBooking::where('boat_id', $boat->id)
             ->whereIn('status', ['pending', 'boat_assigned'])
@@ -43,6 +48,7 @@ class BoatBookingController extends Controller
                 'image' => $boat->image,
             ],
             'bookedDates' => $bookedDates,
+            'boat_images' => $boat->images,
         ]);
     }
 

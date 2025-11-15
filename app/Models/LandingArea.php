@@ -35,4 +35,14 @@ class LandingArea extends Model
     {
         return $this->hasMany(LandingAreaRequest::class, 'landing_area_id');
     }
+
+    public function images()
+    {
+        return $this->hasMany(LandingAreaImage::class, 'landing_area_id')->orderBy('order');
+    }
+
+    public function primaryImage()
+    {
+        return $this->hasOne(LandingAreaImage::class, 'landing_area_id')->where('is_primary', true);
+    }
 }

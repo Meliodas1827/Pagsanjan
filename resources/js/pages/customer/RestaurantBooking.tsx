@@ -38,8 +38,18 @@ interface Restaurant {
     total_capacity: number;
 }
 
+interface RestoImage {
+    id: number;
+    resto_id: number;
+    image_path: string;
+    caption: string | null;
+    order: number;
+    is_primary: boolean;
+}
+
 interface PageProps {
     restaurant: Restaurant;
+    resto_images: RestoImage[];
 }
 
 const PublicNavBar = ({ role }: { role: number }) => {
@@ -98,10 +108,11 @@ const PublicNavBar = ({ role }: { role: number }) => {
 
 export default function RestaurantBooking() {
     const { auth } = usePage<SharedData>().props;
-    const { restaurant } = usePage<PageProps>().props;
+    const { restaurant, resto_images } = usePage<PageProps>().props;
     const user = auth?.user?.role_id ?? 0;
     const [selectedTable, setSelectedTable] = useState<RestoTable | null>(null);
     const [showBookingForm, setShowBookingForm] = useState(false);
+    const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
     const form = useForm({
         resto_id: restaurant.id,
@@ -167,8 +178,52 @@ export default function RestaurantBooking() {
                             </div>
                         </div>
 
-                        {/* Restaurant Image */}
-                        {restaurant.img && (
+                        {/* Restaurant Images Gallery */}
+                        {resto_images && resto_images.length > 0 && (
+                            <div className="mt-8">
+                                {/* Main Image */}
+                                <div className="relative aspect-video w-full overflow-hidden rounded-lg shadow-lg">
+                                    <img
+                                        src={`/storage/${resto_images[selectedImageIndex].image_path}`}
+                                        alt={resto_images[selectedImageIndex].caption || restaurant.resto_name}
+                                        className="h-full w-full object-cover"
+                                    />
+                                    {resto_images[selectedImageIndex].caption && (
+                                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                                            <p className="text-white text-sm font-medium">
+                                                {resto_images[selectedImageIndex].caption}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Thumbnail Gallery */}
+                                {resto_images.length > 1 && (
+                                    <div className="mt-4 grid grid-cols-4 gap-2 md:grid-cols-6 lg:grid-cols-8">
+                                        {resto_images.map((image, index) => (
+                                            <button
+                                                key={image.id}
+                                                onClick={() => setSelectedImageIndex(index)}
+                                                className={`aspect-square overflow-hidden rounded-lg border-2 transition-all ${
+                                                    selectedImageIndex === index
+                                                        ? 'border-emerald-600 ring-2 ring-emerald-200'
+                                                        : 'border-transparent hover:border-gray-300'
+                                                }`}
+                                            >
+                                                <img
+                                                    src={`/storage/${image.image_path}`}
+                                                    alt={image.caption || `Image ${index + 1}`}
+                                                    className="h-full w-full object-cover"
+                                                />
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Fallback to old single image if no resto_images */}
+                        {(!resto_images || resto_images.length === 0) && restaurant.img && (
                             <div className="mt-8 overflow-hidden rounded-lg shadow-lg">
                                 <img
                                     src={restaurant.img}

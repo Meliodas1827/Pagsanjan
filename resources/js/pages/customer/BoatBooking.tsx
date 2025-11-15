@@ -35,9 +35,19 @@ interface BoatAvailability {
     available: number;
 }
 
+interface BoatImage {
+    id: number;
+    boat_id: number;
+    image_path: string;
+    caption: string | null;
+    order: number;
+    is_primary: boolean;
+}
+
 interface PageProps {
     boat: Boat;
     bookedDates: BookedDate[];
+    boat_images: BoatImage[];
 }
 
 const PublicNavBar = ({ role }: { role: number }) => {
@@ -94,13 +104,14 @@ const PublicNavBar = ({ role }: { role: number }) => {
 
 export default function BoatBooking() {
     const { auth } = usePage<SharedData>().props;
-    const { boat, bookedDates } = usePage<PageProps>().props;
+    const { boat, bookedDates, boat_images } = usePage<PageProps>().props;
     const [showPaymentDialog, setShowPaymentDialog] = useState(false);
     const [dateError, setDateError] = useState<string>('');
     const [capacityError, setCapacityError] = useState<string>('');
     const [boatAvailability, setBoatAvailability] = useState<BoatAvailability | null>(null);
     const user = auth?.user?.role_id ?? 0;
     const [open, setOpen] = useState(false);
+    const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
     const { data, setData, post, processing, errors } = useForm({
         boat_id: boat.id,
@@ -250,8 +261,56 @@ export default function BoatBooking() {
                         Back to Home
                     </Link>
 
-                    {/* Boat Image */}
-                    {boat.image && (
+                    {/* Boat Images Gallery */}
+                    {boat_images && boat_images.length > 0 && (
+                        <div className="mb-8">
+                            <Card>
+                                <CardContent className="p-0">
+                                    {/* Main Image */}
+                                    <div className="relative aspect-video w-full overflow-hidden rounded-t-lg">
+                                        <img
+                                            src={`/storage/${boat_images[selectedImageIndex].image_path}`}
+                                            alt={boat_images[selectedImageIndex].caption || `Boat ${boat.boat_no}`}
+                                            className="h-full w-full object-cover"
+                                        />
+                                        {boat_images[selectedImageIndex].caption && (
+                                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                                                <p className="text-white text-sm font-medium">
+                                                    {boat_images[selectedImageIndex].caption}
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Thumbnail Gallery */}
+                                    {boat_images.length > 1 && (
+                                        <div className="grid grid-cols-4 gap-2 p-4 md:grid-cols-6 lg:grid-cols-8">
+                                            {boat_images.map((image, index) => (
+                                                <button
+                                                    key={image.id}
+                                                    onClick={() => setSelectedImageIndex(index)}
+                                                    className={`aspect-square overflow-hidden rounded-lg border-2 transition-all ${
+                                                        selectedImageIndex === index
+                                                            ? 'border-emerald-600 ring-2 ring-emerald-200'
+                                                            : 'border-transparent hover:border-gray-300'
+                                                    }`}
+                                                >
+                                                    <img
+                                                        src={`/storage/${image.image_path}`}
+                                                        alt={image.caption || `Image ${index + 1}`}
+                                                        className="h-full w-full object-cover"
+                                                    />
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        </div>
+                    )}
+
+                    {/* Fallback to old single image if no boat_images */}
+                    {(!boat_images || boat_images.length === 0) && boat.image && (
                         <Card className="mb-8">
                             <CardContent className="p-0">
                                 <img

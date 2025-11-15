@@ -8,6 +8,15 @@ import { ArrowLeft, DollarSign, LogOut, MapPin, NotebookTabs, Sailboat, User, Us
 import { useState } from 'react';
 import { toast } from 'sonner';
 
+interface LandingAreaImage {
+    id: number;
+    landing_area_id: number;
+    image_path: string;
+    caption: string | null;
+    order: number;
+    is_primary: boolean;
+}
+
 interface LandingArea {
     id: number;
     name: string;
@@ -18,6 +27,7 @@ interface LandingArea {
     image: string | null;
     payment_qr: string | null;
     price: number | string | null;
+    images: LandingAreaImage[];
 }
 
 interface UserData {
@@ -90,6 +100,7 @@ export default function LandingAreaBooking() {
     const { landingArea, userData } = usePage<PageProps>().props;
     const user = auth?.user?.role_id ?? 0;
     const [showBookingForm, setShowBookingForm] = useState(false);
+    const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
     const form = useForm({
         landing_area_id: landingArea.id,
@@ -156,12 +167,45 @@ export default function LandingAreaBooking() {
                             </div>
                         </div>
 
-                        {/* Landing Area Image */}
-                        {landingArea.image && (
+                        {/* Landing Area Image Gallery */}
+                        {landingArea.images && landingArea.images.length > 0 ? (
+                            <div className="mt-8 space-y-4">
+                                {/* Main Image */}
+                                <div className="relative overflow-hidden rounded-lg shadow-lg">
+                                    <img
+                                        src={`/storage/${landingArea.images[selectedImageIndex].image_path}`}
+                                        alt={landingArea.images[selectedImageIndex].caption || landingArea.name}
+                                        className="h-96 w-full object-cover"
+                                    />
+                                    {landingArea.images[selectedImageIndex].caption && (
+                                        <div className="absolute bottom-0 left-0 right-0 bg-black/50 px-4 py-2 text-white">
+                                            <p className="text-sm">{landingArea.images[selectedImageIndex].caption}</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Thumbnail Gallery */}
+                                {landingArea.images.length > 1 && (
+                                    <div className="grid grid-cols-4 gap-4 sm:grid-cols-6 md:grid-cols-8">
+                                        {landingArea.images.map((img, index) => (
+                                            <button
+                                                key={img.id}
+                                                onClick={() => setSelectedImageIndex(index)}
+                                                className={`overflow-hidden rounded-md border-2 transition-all ${
+                                                    selectedImageIndex === index ? 'border-blue-600 ring-2 ring-blue-600' : 'border-transparent hover:border-gray-300'
+                                                }`}
+                                            >
+                                                <img src={`/storage/${img.image_path}`} alt={img.caption || `Image ${index + 1}`} className="h-16 w-full object-cover" />
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        ) : landingArea.image ? (
                             <div className="mt-8 overflow-hidden rounded-lg shadow-lg">
                                 <img src={`/storage/${landingArea.image}`} alt={landingArea.name} className="h-96 w-full object-cover" />
                             </div>
-                        )}
+                        ) : null}
                     </div>
                 </div>
 
@@ -173,7 +217,13 @@ export default function LandingAreaBooking() {
                         <div className="relative w-full max-w-md">
                             {/* Image Card - Base Layer */}
                             <div className="relative h-72 overflow-hidden rounded-lg shadow-lg">
-                                {landingArea.image ? (
+                                {landingArea.images && landingArea.images.length > 0 ? (
+                                    <img
+                                        src={`/storage/${landingArea.images.find(img => img.is_primary)?.image_path || landingArea.images[0].image_path}`}
+                                        alt={landingArea.name}
+                                        className="h-full w-full object-cover"
+                                    />
+                                ) : landingArea.image ? (
                                     <img src={`/storage/${landingArea.image}`} alt={landingArea.name} className="h-full w-full object-cover" />
                                 ) : (
                                     <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-100 to-blue-200">

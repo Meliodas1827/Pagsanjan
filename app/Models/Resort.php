@@ -26,6 +26,16 @@ class Resort extends Model
         return $this->hasMany(ResortBooking::class);
     }
 
+    public function images()
+    {
+        return $this->hasMany(ResortImage::class)->orderBy('order');
+    }
+
+    public function primaryImage()
+    {
+        return $this->hasOne(ResortImage::class)->where('is_primary', true);
+    }
+
     public static function getResorts()
     {
         return self::all();

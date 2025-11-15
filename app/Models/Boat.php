@@ -24,4 +24,14 @@ class Boat extends Model
     {
         return $this->hasMany(BoatBooking::class);
     }
+
+    public function images()
+    {
+        return $this->hasMany(BoatImage::class)->orderBy('order');
+    }
+
+    public function primaryImage()
+    {
+        return $this->hasOne(BoatImage::class)->where('is_primary', true);
+    }
 }

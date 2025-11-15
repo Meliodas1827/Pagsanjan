@@ -15,7 +15,7 @@ class LandingAreaBookingController extends Controller
 {
     public function show($id)
     {
-        $landingArea = LandingArea::findOrFail($id);
+        $landingArea = LandingArea::with(['images'])->findOrFail($id);
 
         if (!$landingArea->is_active) {
             abort(404);
@@ -36,6 +36,7 @@ class LandingAreaBookingController extends Controller
                 'image' => $landingArea->image,
                 'payment_qr' => $landingArea->payment_qr,
                 'price' => $landingArea->price,
+                'images' => $landingArea->images,
             ],
             'userData' => [
                 'name' => $user?->name ?? '',

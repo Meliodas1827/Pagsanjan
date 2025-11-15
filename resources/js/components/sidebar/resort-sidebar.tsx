@@ -1,5 +1,5 @@
 import { NavItem } from '@/types';
-import { BookOpen, DollarSign, MessageSquare, QrCode } from 'lucide-react';
+import { BookOpen, DollarSign, ImageIcon, MessageSquare, QrCode } from 'lucide-react';
 import { NavMain } from '../nav-main';
 import { SidebarContent } from '../ui/sidebar';
 
@@ -8,6 +8,11 @@ const mainNavItems: NavItem[] = [
         title: 'Bookings',
         href: '/resort-bookings',
         icon: BookOpen,
+    },
+    {
+        title: 'Resort Images',
+        href: '/resort-images',
+        icon: ImageIcon,
     },
     {
         title: 'Payment QR',

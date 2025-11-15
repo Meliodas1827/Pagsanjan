@@ -16,7 +16,10 @@ class CustomerResortBookingController extends Controller
 {
     public function show($id)
     {
-        $resort = Resort::where('id', $id)
+        $resort = Resort::with(['images' => function($query) {
+            $query->orderBy('order');
+        }])
+            ->where('id', $id)
             ->where('deleted', 0)
             ->firstOrFail();
 
@@ -32,6 +35,7 @@ class CustomerResortBookingController extends Controller
                 'payment_qr' => $resort->payment_qr,
             ],
             'entrance_fees' => $entranceFees,
+            'resort_images' => $resort->images,
         ]);
     }
 

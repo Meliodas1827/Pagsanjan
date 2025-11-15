@@ -1,5 +1,5 @@
 import { NavItem } from '@/types';
-import { LayoutGrid, MessageSquare, Ship } from 'lucide-react';
+import { ImageIcon, LayoutGrid, MessageSquare, Ship } from 'lucide-react';
 import { NavMain } from '../nav-main';
 import { SidebarContent } from '../ui/sidebar';
 
@@ -23,6 +23,11 @@ const Ubaap: NavItem[] = [
         title: 'Boat Management',
         href: '/manage-boats',
         icon: Ship,
+    },
+    {
+        title: 'Boat Images',
+        href: '/boat-images',
+        icon: ImageIcon,
     },
     {
         title: 'Feedbacks',

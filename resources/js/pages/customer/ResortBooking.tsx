@@ -23,9 +23,19 @@ interface EntranceFee {
     amount: string;
 }
 
+interface ResortImage {
+    id: number;
+    resort_id: number;
+    image_path: string;
+    caption: string | null;
+    order: number;
+    is_primary: boolean;
+}
+
 interface PageProps {
     resort: Resort;
     entrance_fees: EntranceFee[];
+    resort_images: ResortImage[];
 }
 
 const PublicNavBar = ({ role }: { role: number }) => {
@@ -84,13 +94,14 @@ const PublicNavBar = ({ role }: { role: number }) => {
 
 export default function ResortBooking() {
     const { auth } = usePage<SharedData>().props;
-    const { resort, entrance_fees } = usePage<PageProps>().props;
+    const { resort, entrance_fees, resort_images } = usePage<PageProps>().props;
     const [checkInDate, setCheckInDate] = useState('');
     const [checkOutDate, setCheckOutDate] = useState('');
     const [guests, setGuests] = useState<{ [key: string]: number }>({});
     const [paymentProof, setPaymentProof] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
     const user = auth?.user?.role_id ?? 0;
 
@@ -220,6 +231,54 @@ export default function ResortBooking() {
                         <h1 className="mb-2 text-3xl font-bold text-gray-900">{resort.resort_name}</h1>
                         <p className="text-gray-600">Reserve your visit and pay the entrance fee</p>
                     </div>
+
+                    {/* Resort Images Gallery */}
+                    {resort_images && resort_images.length > 0 && (
+                        <div className="mb-8">
+                            <Card>
+                                <CardContent className="p-0">
+                                    {/* Main Image */}
+                                    <div className="relative aspect-video w-full overflow-hidden rounded-t-lg">
+                                        <img
+                                            src={`/storage/${resort_images[selectedImageIndex].image_path}`}
+                                            alt={resort_images[selectedImageIndex].caption || resort.resort_name}
+                                            className="h-full w-full object-cover"
+                                        />
+                                        {resort_images[selectedImageIndex].caption && (
+                                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                                                <p className="text-white text-sm font-medium">
+                                                    {resort_images[selectedImageIndex].caption}
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Thumbnail Gallery */}
+                                    {resort_images.length > 1 && (
+                                        <div className="grid grid-cols-4 gap-2 p-4 md:grid-cols-6 lg:grid-cols-8">
+                                            {resort_images.map((image, index) => (
+                                                <button
+                                                    key={image.id}
+                                                    onClick={() => setSelectedImageIndex(index)}
+                                                    className={`aspect-square overflow-hidden rounded-lg border-2 transition-all ${
+                                                        selectedImageIndex === index
+                                                            ? 'border-emerald-600 ring-2 ring-emerald-200'
+                                                            : 'border-transparent hover:border-gray-300'
+                                                    }`}
+                                                >
+                                                    <img
+                                                        src={`/storage/${image.image_path}`}
+                                                        alt={image.caption || `Image ${index + 1}`}
+                                                        className="h-full w-full object-cover"
+                                                    />
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        </div>
+                    )}
 
                     <div className="grid gap-6 lg:grid-cols-3">
                         {/* Left Column - Booking Form */}
