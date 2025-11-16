@@ -3,6 +3,7 @@ import { Head, router, useForm } from '@inertiajs/react';
 import { Pencil, Trash2, Upload } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -58,7 +59,10 @@ export default function LandingAreaImages({ landingArea, images }: Props) {
 
     const handleUpload = (e: FormEvent) => {
         e.preventDefault();
-        if (!selectedImage) return;
+        if (!selectedImage) {
+            toast.error('Please select an image');
+            return;
+        }
 
         const formData = new FormData();
         formData.append('image', selectedImage);
@@ -68,10 +72,16 @@ export default function LandingAreaImages({ landingArea, images }: Props) {
         router.post('/landing-area-images', formData, {
             forceFormData: true,
             onSuccess: () => {
+                toast.success('Image uploaded successfully!');
                 setSelectedImage(null);
                 setPreviewUrl('');
                 setCaption('');
                 setIsPrimary(false);
+            },
+            onError: (errors) => {
+                console.error('Upload errors:', errors);
+                const errorMessage = Object.values(errors)[0] as string;
+                toast.error(errorMessage || 'Failed to upload image');
             },
         });
     };
@@ -90,14 +100,29 @@ export default function LandingAreaImages({ landingArea, images }: Props) {
             is_primary: editIsPrimary,
         }, {
             onSuccess: () => {
+                toast.success('Image updated successfully!');
                 setEditingImage(null);
+            },
+            onError: (errors) => {
+                console.error('Update errors:', errors);
+                const errorMessage = Object.values(errors)[0] as string;
+                toast.error(errorMessage || 'Failed to update image');
             },
         });
     };
 
     const handleDelete = (imageId: number) => {
         if (confirm('Are you sure you want to delete this image?')) {
-            router.delete(`/landing-area-images/${imageId}`);
+            router.delete(`/landing-area-images/${imageId}`, {
+                onSuccess: () => {
+                    toast.success('Image deleted successfully!');
+                },
+                onError: (errors) => {
+                    console.error('Delete errors:', errors);
+                    const errorMessage = Object.values(errors)[0] as string;
+                    toast.error(errorMessage || 'Failed to delete image');
+                },
+            });
         }
     };
 

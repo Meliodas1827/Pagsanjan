@@ -1,11 +1,12 @@
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { type SharedData } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { ArrowLeft, DollarSign, LogOut, MapPin, NotebookTabs, Sailboat, User, UserRoundCog, Users } from 'lucide-react';
-import { useState } from 'react';
+import { Calendar, LogOut, NotebookTabs, Upload, User, UserRoundCog, Users } from 'lucide-react';
+import { FormEvent, useState } from 'react';
 import { toast } from 'sonner';
 
 interface LandingAreaImage {
@@ -99,8 +100,9 @@ export default function LandingAreaBooking() {
     const { auth } = usePage<SharedData>().props;
     const { landingArea, userData } = usePage<PageProps>().props;
     const user = auth?.user?.role_id ?? 0;
-    const [showBookingForm, setShowBookingForm] = useState(false);
-    const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+    const [paymentProof, setPaymentProof] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const form = useForm({
         landing_area_id: landingArea.id,
@@ -114,399 +116,413 @@ export default function LandingAreaBooking() {
         payment_proof: null as File | null,
     });
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+    // Get hero image - use main landing area image
+    const heroImage = landingArea.image;
 
-        form.post(route('landing-area.booking.store'), {
-            onSuccess: () => {
-                toast.success('Landing area booking submitted successfully!');
-                setShowBookingForm(false);
-            },
-            onError: (errors) => {
-                const errorMessage = Object.values(errors)[0] as string;
-                toast.error(errorMessage || 'Failed to book landing area');
-            },
-        });
+    // Generate short description if none exists
+    const getDescription = () => {
+        return landingArea.description || `Experience an amazing boat ride to ${landingArea.name}. Book your adventure today and create unforgettable memories.`;
     };
+
+    // Get 4 images for the 2x2 gallery from landing_area images
+    const getGalleryImages = () => {
+        if (!landingArea.images || landingArea.images.length === 0) return [];
+        return landingArea.images.slice(0, 4);
+    };
+
+    const galleryImages = getGalleryImages();
 
     // Get tomorrow's date as minimum date
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     const minDate = tomorrow.toISOString().split('T')[0];
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setPaymentProof(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewUrl(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleSubmit = (e: FormEvent) => {
+        e.preventDefault();
+
+        if (!form.data.pickup_date || !form.data.pickup_time) {
+            toast.error('Please select pickup date and time');
+            return;
+        }
+
+        if (!paymentProof) {
+            toast.error('Please upload payment proof');
+            return;
+        }
+
+        if (landingArea.capacity && (form.data.number_of_adults + form.data.number_of_children) > landingArea.capacity) {
+            toast.error(`Total guests cannot exceed capacity of ${landingArea.capacity} people`);
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        const formData = new FormData();
+        formData.append('landing_area_id', form.data.landing_area_id.toString());
+        formData.append('customer_name', form.data.customer_name);
+        formData.append('customer_email', form.data.customer_email);
+        formData.append('customer_phone', form.data.customer_phone);
+        formData.append('number_of_adults', form.data.number_of_adults.toString());
+        formData.append('number_of_children', form.data.number_of_children.toString());
+        formData.append('pickup_date', form.data.pickup_date);
+        formData.append('pickup_time', form.data.pickup_time);
+        formData.append('payment_proof', paymentProof);
+
+        router.post(route('landing-area.booking.store'), formData, {
+            forceFormData: true,
+            onSuccess: () => {
+                toast.success('Boat ride booking submitted successfully!');
+                form.reset();
+                setPaymentProof(null);
+                setPreviewUrl(null);
+                setIsSubmitting(false);
+            },
+            onError: (errors) => {
+                console.error(errors);
+                const errorMessage = Object.values(errors)[0] as string;
+                toast.error(errorMessage || 'Failed to submit booking. Please try again.');
+                setIsSubmitting(false);
+            },
+        });
+    };
+
+    const totalGuests = form.data.number_of_adults + form.data.number_of_children;
+    const qrCodeUrl = landingArea.payment_qr ? `/storage/${landingArea.payment_qr}` : null;
+
     return (
         <>
-            <Head title={landingArea.name} />
+            <Head title={`Book ${landingArea.name}`} />
             <PublicNavBar role={user} />
 
             <div className="min-h-screen bg-gray-50">
-                {/* Landing Area Header */}
-                <div className="bg-white shadow">
-                    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-                        <Link href="/dashboard" className="mb-4 inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900">
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            Back to Dashboard
+                {/* Header */}
+                <div className="bg-white shadow-sm">
+                    <div className="mx-auto max-w-7xl px-6 py-4">
+                        <Link href="/" className="inline-flex items-center text-emerald-600 hover:text-emerald-700">
+                            ← Back to Home
                         </Link>
+                    </div>
+                </div>
 
-                        <div className="mt-4">
-                            <h1 className="text-4xl font-light text-gray-900">{landingArea.name}</h1>
-                            {landingArea.description && <p className="mt-2 text-lg text-gray-600">{landingArea.description}</p>}
-                            <div className="mt-4 flex flex-wrap gap-4 text-gray-600">
-                                {landingArea.location && (
-                                    <div className="flex items-center">
-                                        <MapPin className="mr-2 h-5 w-5" />
-                                        <span>{landingArea.location}</span>
-                                    </div>
-                                )}
-                                {landingArea.capacity && (
-                                    <div className="flex items-center">
-                                        <Users className="mr-2 h-5 w-5" />
-                                        <span>Capacity: {landingArea.capacity} people</span>
-                                    </div>
-                                )}
+                {/* Hero Image */}
+                <div className="relative h-[500px] w-full overflow-hidden bg-gray-900">
+                    {heroImage ? (
+                        <>
+                            <img
+                                src={heroImage.startsWith('/') ? heroImage : `/storage/${heroImage}`}
+                                alt={landingArea.name}
+                                className="h-full w-full object-cover opacity-90"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                            <div className="absolute bottom-0 left-0 right-0 px-6 pb-12">
+                                <div className="mx-auto max-w-7xl">
+                                    <h1 className="text-5xl font-bold text-white">{landingArea.name}</h1>
+                                </div>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="flex h-full w-full items-center justify-center">
+                            <div className="text-center">
+                                <h1 className="text-5xl font-bold text-white">{landingArea.name}</h1>
                             </div>
                         </div>
+                    )}
+                </div>
 
-                        {/* Landing Area Image Gallery */}
-                        {landingArea.images && landingArea.images.length > 0 ? (
-                            <div className="mt-8 space-y-4">
-                                {/* Main Image */}
-                                <div className="relative overflow-hidden rounded-lg shadow-lg">
-                                    <img
-                                        src={`/storage/${landingArea.images[selectedImageIndex].image_path}`}
-                                        alt={landingArea.images[selectedImageIndex].caption || landingArea.name}
-                                        className="h-96 w-full object-cover"
-                                    />
-                                    {landingArea.images[selectedImageIndex].caption && (
-                                        <div className="absolute bottom-0 left-0 right-0 bg-black/50 px-4 py-2 text-white">
-                                            <p className="text-sm">{landingArea.images[selectedImageIndex].caption}</p>
-                                        </div>
-                                    )}
-                                </div>
+                <div className="mx-auto max-w-7xl px-6 py-8">
+                    <div className="grid gap-8 lg:grid-cols-2">
+                        {/* Left Column - Description & 2x2 Image Gallery */}
+                        <div className="space-y-6">
+                            {/* Description */}
+                            <div className="rounded-lg bg-white p-6 shadow-sm">
+                                <h2 className="mb-3 text-2xl font-semibold text-gray-900">About {landingArea.name}</h2>
+                                <p className="text-gray-600 leading-relaxed">{getDescription()}</p>
+                            </div>
 
-                                {/* Thumbnail Gallery */}
-                                {landingArea.images.length > 1 && (
-                                    <div className="grid grid-cols-4 gap-4 sm:grid-cols-6 md:grid-cols-8">
-                                        {landingArea.images.map((img, index) => (
-                                            <button
-                                                key={img.id}
-                                                onClick={() => setSelectedImageIndex(index)}
-                                                className={`overflow-hidden rounded-md border-2 transition-all ${
-                                                    selectedImageIndex === index ? 'border-blue-600 ring-2 ring-blue-600' : 'border-transparent hover:border-gray-300'
-                                                }`}
+                            {/* 2x2 Image Gallery */}
+                            {galleryImages.length > 0 && (
+                                <div>
+                                    <h3 className="mb-4 text-xl font-semibold text-gray-900">Gallery</h3>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {galleryImages.map((image, index) => (
+                                            <div
+                                                key={image.id}
+                                                className="group relative aspect-square overflow-hidden rounded-lg shadow-md transition-transform hover:scale-105"
                                             >
-                                                <img src={`/storage/${img.image_path}`} alt={img.caption || `Image ${index + 1}`} className="h-16 w-full object-cover" />
-                                            </button>
+                                                <img
+                                                    src={`/storage/${image.image_path}`}
+                                                    alt={image.caption || `${landingArea.name} image ${index + 1}`}
+                                                    className="h-full w-full object-cover"
+                                                />
+                                                {image.caption && (
+                                                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3 opacity-0 transition-opacity group-hover:opacity-100">
+                                                        <p className="text-sm text-white">{image.caption}</p>
+                                                    </div>
+                                                )}
+                                            </div>
                                         ))}
                                     </div>
-                                )}
-                            </div>
-                        ) : landingArea.image ? (
-                            <div className="mt-8 overflow-hidden rounded-lg shadow-lg">
-                                <img src={`/storage/${landingArea.image}`} alt={landingArea.name} className="h-96 w-full object-cover" />
-                            </div>
-                        ) : null}
-                    </div>
-                </div>
-
-                {/* Booking Card */}
-                <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-                    <h2 className="mb-8 text-3xl font-light text-gray-900">Request a boat ride</h2>
-
-                    <div className="flex justify-center">
-                        <div className="relative w-full max-w-md">
-                            {/* Image Card - Base Layer */}
-                            <div className="relative h-72 overflow-hidden rounded-lg shadow-lg">
-                                {landingArea.images && landingArea.images.length > 0 ? (
-                                    <img
-                                        src={`/storage/${landingArea.images.find(img => img.is_primary)?.image_path || landingArea.images[0].image_path}`}
-                                        alt={landingArea.name}
-                                        className="h-full w-full object-cover"
-                                    />
-                                ) : landingArea.image ? (
-                                    <img src={`/storage/${landingArea.image}`} alt={landingArea.name} className="h-full w-full object-cover" />
-                                ) : (
-                                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-100 to-blue-200">
-                                        <div className="text-center">
-                                            <Sailboat className="mx-auto h-20 w-20 text-blue-600" />
-                                            <p className="mt-4 text-3xl font-bold text-blue-800">{landingArea.name}</p>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Details Card - Overlapping Layer */}
-                            <div className="relative mx-4 -mt-16 rounded-lg bg-white p-6 shadow-xl">
-                                <h3 className="text-xl font-semibold text-gray-900">{landingArea.name}</h3>
-                                <p className="mt-1 text-sm text-gray-500">Boat ride destination</p>
-
-                                <div className="mt-4 space-y-2">
-                                    {landingArea.location && (
-                                        <div className="flex items-center text-sm text-gray-600">
-                                            <MapPin className="mr-2 h-4 w-4" />
-                                            <span>{landingArea.location}</span>
-                                        </div>
-                                    )}
-                                    {landingArea.capacity && (
-                                        <div className="flex items-center text-sm text-gray-600">
-                                            <Users className="mr-2 h-4 w-4" />
-                                            <span>Capacity: {landingArea.capacity} people</span>
-                                        </div>
-                                    )}
-                                    {landingArea.address && (
-                                        <div className="flex items-center text-sm text-gray-600">
-                                            <MapPin className="mr-2 h-4 w-4" />
-                                            <span>{landingArea.address}</span>
-                                        </div>
-                                    )}
                                 </div>
-
-                                <div className="mt-4 flex items-center justify-between border-t pt-4">
-                                    <div className="flex items-center">
-                                        <DollarSign className="h-5 w-5 text-blue-600" />
-                                        <span className="text-2xl font-bold text-gray-900">{landingArea.price}</span>
-                                        <span className="ml-1 text-sm text-gray-500">₱</span>
-                                    </div>
-                                    <button
-                                        onClick={() => setShowBookingForm(true)}
-                                        className="rounded-md bg-[#18371e] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#2a5230]"
-                                    >
-                                        Book Now
-                                    </button>
-                                </div>
-                            </div>
+                            )}
                         </div>
-                    </div>
-                </div>
 
-                {/* Booking Form Modal */}
-                {showBookingForm && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-                        <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg bg-white p-8 shadow-2xl">
-                            <h2 className="text-2xl font-semibold text-gray-900">Book Boat Ride to {landingArea.name}</h2>
-                            <p className="mt-2 text-sm text-gray-600">Complete your booking details below</p>
+                        {/* Right Column - Reservation Form */}
+                        <div className="space-y-6">
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                {/* Booking Details Card */}
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Booking Details</CardTitle>
+                                        <CardDescription>Enter your information and select pickup details</CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="space-y-6">
+                                        {/* Customer Information */}
+                                        <div className="space-y-4">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="customer_name">Full Name</Label>
+                                                <Input
+                                                    id="customer_name"
+                                                    type="text"
+                                                    value={form.data.customer_name}
+                                                    onChange={(e) => form.setData('customer_name', e.target.value)}
+                                                    required
+                                                />
+                                            </div>
 
-                            <form onSubmit={handleSubmit} className="mt-6 space-y-6">
-                                {/* Customer Name */}
-                                <div>
-                                    <Label htmlFor="customer_name">Full Name</Label>
-                                    <Input
-                                        id="customer_name"
-                                        type="text"
-                                        value={form.data.customer_name}
-                                        onChange={(e) => form.setData('customer_name', e.target.value)}
-                                        className="mt-2"
-                                        required
-                                    />
-                                    {form.errors.customer_name && <p className="mt-1 text-sm text-red-500">{form.errors.customer_name}</p>}
-                                </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="customer_email">Email Address</Label>
+                                                <Input
+                                                    id="customer_email"
+                                                    type="email"
+                                                    value={form.data.customer_email}
+                                                    onChange={(e) => form.setData('customer_email', e.target.value)}
+                                                />
+                                            </div>
 
-                                {/* Customer Email */}
-                                <div>
-                                    <Label htmlFor="customer_email">Email Address</Label>
-                                    <Input
-                                        id="customer_email"
-                                        type="email"
-                                        value={form.data.customer_email}
-                                        onChange={(e) => form.setData('customer_email', e.target.value)}
-                                        className="mt-2"
-                                    />
-                                    {form.errors.customer_email && <p className="mt-1 text-sm text-red-500">{form.errors.customer_email}</p>}
-                                </div>
-
-                                {/* Customer Phone */}
-                                <div>
-                                    <Label htmlFor="customer_phone">Phone Number</Label>
-                                    <Input
-                                        id="customer_phone"
-                                        type="tel"
-                                        value={form.data.customer_phone}
-                                        onChange={(e) => form.setData('customer_phone', e.target.value)}
-                                        className="mt-2"
-                                        required
-                                    />
-                                    {form.errors.customer_phone && <p className="mt-1 text-sm text-red-500">{form.errors.customer_phone}</p>}
-                                </div>
-
-                                {/* Number of Adults */}
-                                <div>
-                                    <Label htmlFor="adults">Number of Adults</Label>
-                                    <Input
-                                        id="adults"
-                                        type="number"
-                                        min="1"
-                                        value={form.data.number_of_adults}
-                                        onChange={(e) => form.setData('number_of_adults', parseInt(e.target.value) || 1)}
-                                        className="mt-2"
-                                    />
-                                    {form.errors.number_of_adults && <p className="mt-1 text-sm text-red-500">{form.errors.number_of_adults}</p>}
-                                </div>
-
-                                {/* Number of Children */}
-                                <div>
-                                    <Label htmlFor="children">Number of Children</Label>
-                                    <Input
-                                        id="children"
-                                        type="number"
-                                        min="0"
-                                        value={form.data.number_of_children}
-                                        onChange={(e) => form.setData('number_of_children', parseInt(e.target.value) || 0)}
-                                        className="mt-2"
-                                    />
-                                    {landingArea.capacity && (
-                                        <p className="mt-1 text-xs text-muted-foreground">
-                                            Maximum capacity: {landingArea.capacity} people (Total: {form.data.number_of_adults + form.data.number_of_children})
-                                        </p>
-                                    )}
-                                    {form.errors.number_of_children && <p className="mt-1 text-sm text-red-500">{form.errors.number_of_children}</p>}
-                                </div>
-
-                                {/* Pickup Date */}
-                                <div>
-                                    <Label htmlFor="pickup_date">Pickup Date</Label>
-                                    <Input
-                                        id="pickup_date"
-                                        type="date"
-                                        min={minDate}
-                                        value={form.data.pickup_date}
-                                        onChange={(e) => form.setData('pickup_date', e.target.value)}
-                                        className="mt-2"
-                                    />
-                                    {form.errors.pickup_date && <p className="mt-1 text-sm text-red-500">{form.errors.pickup_date}</p>}
-                                </div>
-
-                                {/* Pickup Time */}
-                                <div>
-                                    <Label htmlFor="pickup_time">Pickup Time</Label>
-                                    <Input
-                                        id="pickup_time"
-                                        type="time"
-                                        value={form.data.pickup_time}
-                                        onChange={(e) => form.setData('pickup_time', e.target.value)}
-                                        className="mt-2"
-                                    />
-                                    {form.errors.pickup_time && <p className="mt-1 text-sm text-red-500">{form.errors.pickup_time}</p>}
-                                </div>
-
-                                {/* Admin Approval Notice */}
-                                <div className="rounded-lg border-2 border-yellow-400 bg-yellow-50 p-4">
-                                    <div className="flex items-start gap-3">
-                                        <div className="flex-shrink-0">
-                                            <svg className="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-                                            </svg>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="customer_phone">Phone Number</Label>
+                                                <Input
+                                                    id="customer_phone"
+                                                    type="tel"
+                                                    value={form.data.customer_phone}
+                                                    onChange={(e) => form.setData('customer_phone', e.target.value)}
+                                                    required
+                                                />
+                                            </div>
                                         </div>
-                                        <div className="flex-1">
-                                            <h4 className="mb-1 font-semibold text-yellow-900">Admin Approval Required</h4>
-                                            <p className="text-sm text-yellow-800">
-                                                Your booking request will be reviewed by our admin team. They will verify your booking details and payment before approval. You will be notified once your booking is confirmed.
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
 
-                                {/* Booking Summary */}
-                                <div className="rounded-lg border bg-blue-50 p-4">
-                                    <h4 className="mb-2 font-semibold text-blue-900">Booking Summary</h4>
-                                    <div className="space-y-1 text-sm text-blue-800">
-                                        <p>
-                                            <span className="font-medium">Destination:</span> {landingArea.name}
-                                        </p>
-                                        {landingArea.location && (
-                                            <p>
-                                                <span className="font-medium">Location:</span> {landingArea.location}
-                                            </p>
-                                        )}
-                                        <p>
-                                            <span className="font-medium">Name:</span> {form.data.customer_name}
-                                        </p>
-                                        <p>
-                                            <span className="font-medium">Adults:</span> {form.data.number_of_adults}
-                                        </p>
-                                        <p>
-                                            <span className="font-medium">Children:</span> {form.data.number_of_children}
-                                        </p>
-                                        <p>
-                                            <span className="font-medium">Total People:</span> {form.data.number_of_adults + form.data.number_of_children}
-                                        </p>
-                                        {form.data.pickup_date && (
-                                            <p>
-                                                <span className="font-medium">Date:</span> {form.data.pickup_date}
-                                            </p>
-                                        )}
-                                        {form.data.pickup_time && (
-                                            <p>
-                                                <span className="font-medium">Time:</span> {form.data.pickup_time}
-                                            </p>
-                                        )}
+                                        {/* Pickup Date and Time */}
+                                        <div className="grid gap-4 sm:grid-cols-2">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="pickup_date">Pickup Date</Label>
+                                                <div className="relative">
+                                                    <Calendar className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                                                    <Input
+                                                        id="pickup_date"
+                                                        type="date"
+                                                        value={form.data.pickup_date}
+                                                        onChange={(e) => form.setData('pickup_date', e.target.value)}
+                                                        min={minDate}
+                                                        className="pl-10"
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="pickup_time">Pickup Time</Label>
+                                                <Input
+                                                    id="pickup_time"
+                                                    type="time"
+                                                    value={form.data.pickup_time}
+                                                    onChange={(e) => form.setData('pickup_time', e.target.value)}
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Number of Guests */}
+                                        <div className="space-y-4">
+                                            <div className="flex items-center gap-2">
+                                                <Users className="h-5 w-5 text-gray-500" />
+                                                <Label className="text-base font-semibold">Number of Guests</Label>
+                                            </div>
+                                            <div className="grid gap-4 sm:grid-cols-2">
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="adults">Adults</Label>
+                                                    <Input
+                                                        id="adults"
+                                                        type="number"
+                                                        min="1"
+                                                        value={form.data.number_of_adults}
+                                                        onChange={(e) => form.setData('number_of_adults', parseInt(e.target.value) || 1)}
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="children">Children</Label>
+                                                    <Input
+                                                        id="children"
+                                                        type="number"
+                                                        min="0"
+                                                        value={form.data.number_of_children}
+                                                        onChange={(e) => form.setData('number_of_children', parseInt(e.target.value) || 0)}
+                                                    />
+                                                </div>
+                                            </div>
+                                            {landingArea.capacity && (
+                                                <p className="text-xs text-gray-500">
+                                                    Maximum capacity: {landingArea.capacity} people (Total: {totalGuests})
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        {/* Price Display */}
                                         {landingArea.price && (
-                                            <p>
-                                                <span className="font-medium">Price:</span> ₱{landingArea.price}
-                                            </p>
+                                            <div className="rounded-lg bg-emerald-50 p-4">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-lg font-semibold text-gray-900">Price:</span>
+                                                    <span className="text-2xl font-bold text-emerald-600">₱{landingArea.price}</span>
+                                                </div>
+                                            </div>
                                         )}
-                                    </div>
-                                </div>
+                                    </CardContent>
+                                </Card>
 
-                                {/* Payment QR */}
-                                {landingArea.payment_qr && (
-                                    <div className="rounded-lg border bg-gray-50 p-4">
-                                        <h4 className="mb-3 font-semibold">Payment QR Code</h4>
-                                        <div className="flex justify-center">
-                                            <img
-                                                src={`/storage/${landingArea.payment_qr}`}
-                                                alt="Payment QR"
-                                                className="h-48 w-48 rounded-lg border bg-white p-2"
-                                            />
-                                        </div>
-                                        {landingArea.price && (
-                                            <p className="mt-3 text-center text-xs text-muted-foreground">Scan to pay ₱{landingArea.price}</p>
-                                        )}
-                                    </div>
+                                {/* Payment QR Code Card */}
+                                {qrCodeUrl && (
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle>Payment QR Code</CardTitle>
+                                            <CardDescription>Scan to pay ₱{landingArea.price || '0.00'}</CardDescription>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <div className="flex justify-center rounded-lg bg-white p-6">
+                                                <img src={qrCodeUrl} alt="Payment QR Code" className="h-64 w-64 object-contain" />
+                                            </div>
+                                        </CardContent>
+                                    </Card>
                                 )}
 
                                 {/* Payment Proof Upload */}
-                                <div>
-                                    <Label htmlFor="payment_proof">Upload Payment Proof</Label>
-                                    <Input
-                                        id="payment_proof"
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={(e) => {
-                                            const file = e.target.files?.[0];
-                                            if (file) {
-                                                form.setData('payment_proof', file);
-                                            }
-                                        }}
-                                        className="mt-2"
-                                    />
-                                    <p className="mt-1 text-xs text-muted-foreground">
-                                        Please upload a screenshot or photo of your payment receipt
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Upload Payment Proof</CardTitle>
+                                        <CardDescription>Required to confirm your booking</CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <div className="flex items-center gap-4">
+                                            <Input
+                                                id="payment_proof"
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleFileChange}
+                                                className="hidden"
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() => document.getElementById('payment_proof')?.click()}
+                                                className="w-full"
+                                            >
+                                                <Upload className="mr-2 h-4 w-4" />
+                                                {paymentProof ? 'Change File' : 'Choose File'}
+                                            </Button>
+                                        </div>
+                                        {previewUrl && (
+                                            <div className="overflow-hidden rounded-lg border">
+                                                <img
+                                                    src={previewUrl}
+                                                    alt="Payment proof preview"
+                                                    className="h-48 w-full object-cover"
+                                                />
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                </Card>
+
+                                {/* Booking Summary Card */}
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Booking Summary</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-500">Destination</p>
+                                            <p className="text-lg font-semibold text-gray-900">{landingArea.name}</p>
+                                        </div>
+                                        {landingArea.location && (
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-500">Location</p>
+                                                <p className="font-medium text-gray-900">{landingArea.location}</p>
+                                            </div>
+                                        )}
+                                        {form.data.pickup_date && (
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-500">Pickup Date & Time</p>
+                                                <p className="font-medium text-gray-900">
+                                                    {new Date(form.data.pickup_date).toLocaleDateString('en-US', {
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                        year: 'numeric',
+                                                    })}{' '}
+                                                    {form.data.pickup_time && `at ${form.data.pickup_time}`}
+                                                </p>
+                                            </div>
+                                        )}
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-500">Guests</p>
+                                            <div className="mt-1 space-y-1">
+                                                <div className="flex justify-between text-sm">
+                                                    <span className="text-gray-700">{form.data.number_of_adults} Adults</span>
+                                                </div>
+                                                {form.data.number_of_children > 0 && (
+                                                    <div className="flex justify-between text-sm">
+                                                        <span className="text-gray-700">{form.data.number_of_children} Children</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                        {landingArea.price && (
+                                            <div className="border-t pt-4">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-lg font-semibold text-gray-900">Total</span>
+                                                    <span className="text-2xl font-bold text-emerald-600">₱{landingArea.price}</span>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                </Card>
+
+                                {/* Submit Button */}
+                                <Button
+                                    type="submit"
+                                    className="w-full bg-emerald-600 hover:bg-emerald-700"
+                                    size="lg"
+                                    disabled={isSubmitting}
+                                >
+                                    {isSubmitting ? 'Processing...' : 'Confirm Booking'}
+                                </Button>
+
+                                <div className="rounded-lg border-2 border-yellow-400 bg-yellow-50 p-4">
+                                    <p className="text-sm text-yellow-800">
+                                        <strong>Note:</strong> Your booking will be pending until confirmed by our admin team.
                                     </p>
-                                    {form.errors.payment_proof && <p className="mt-1 text-sm text-red-500">{form.errors.payment_proof}</p>}
                                 </div>
-
-                                {/* Action Buttons */}
-                                <div className="flex gap-3">
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={() => {
-                                            setShowBookingForm(false);
-                                        }}
-                                        className="flex-1"
-                                    >
-                                        Cancel
-                                    </Button>
-                                    <Button type="submit" disabled={form.processing} className="flex-1">
-                                        {form.processing ? 'Submitting...' : 'Confirm Booking'}
-                                    </Button>
-                                </div>
-
-                                <p className="text-xs text-muted-foreground">Your booking will be pending until confirmed by our staff.</p>
                             </form>
                         </div>
                     </div>
-                )}
+                </div>
             </div>
         </>
     );

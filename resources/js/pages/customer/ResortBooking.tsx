@@ -216,74 +216,103 @@ export default function ResortBooking() {
     const totalAmount = calculateTotal();
     const qrCodeUrl = resort.payment_qr ? `/storage/${resort.payment_qr}` : null;
 
+    // Get hero image - use main resort image
+    const heroImage = resort.img;
+
+    // Generate short description if none exists
+    const getDescription = () => {
+        return `Experience the beauty and tranquility of ${resort.resort_name}. Book your visit today and enjoy our facilities.`;
+    };
+
+    // Get 4 images for the 2x2 gallery from resort_images
+    const getGalleryImages = () => {
+        if (!resort_images || resort_images.length === 0) return [];
+        return resort_images.slice(0, 4);
+    };
+
+    const galleryImages = getGalleryImages();
+
     return (
         <>
             <Head title={`Book ${resort.resort_name}`} />
             <PublicNavBar role={user} />
 
             <div className="min-h-screen bg-gray-50">
-                <div className="mx-auto max-w-7xl p-6">
-                    {/* Header */}
-                    <div className="mb-8">
-                        <Link href="/" className="mb-4 inline-flex items-center text-emerald-600 hover:text-emerald-700">
+                {/* Header */}
+                <div className="bg-white shadow-sm">
+                    <div className="mx-auto max-w-7xl px-6 py-4">
+                        <Link href="/" className="inline-flex items-center text-emerald-600 hover:text-emerald-700">
                             ← Back to Home
                         </Link>
-                        <h1 className="mb-2 text-3xl font-bold text-gray-900">{resort.resort_name}</h1>
-                        <p className="text-gray-600">Reserve your visit and pay the entrance fee</p>
                     </div>
+                </div>
 
-                    {/* Resort Images Gallery */}
-                    {resort_images && resort_images.length > 0 && (
-                        <div className="mb-8">
-                            <Card>
-                                <CardContent className="p-0">
-                                    {/* Main Image */}
-                                    <div className="relative aspect-video w-full overflow-hidden rounded-t-lg">
-                                        <img
-                                            src={`/storage/${resort_images[selectedImageIndex].image_path}`}
-                                            alt={resort_images[selectedImageIndex].caption || resort.resort_name}
-                                            className="h-full w-full object-cover"
-                                        />
-                                        {resort_images[selectedImageIndex].caption && (
-                                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                                                <p className="text-white text-sm font-medium">
-                                                    {resort_images[selectedImageIndex].caption}
-                                                </p>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Thumbnail Gallery */}
-                                    {resort_images.length > 1 && (
-                                        <div className="grid grid-cols-4 gap-2 p-4 md:grid-cols-6 lg:grid-cols-8">
-                                            {resort_images.map((image, index) => (
-                                                <button
-                                                    key={image.id}
-                                                    onClick={() => setSelectedImageIndex(index)}
-                                                    className={`aspect-square overflow-hidden rounded-lg border-2 transition-all ${
-                                                        selectedImageIndex === index
-                                                            ? 'border-emerald-600 ring-2 ring-emerald-200'
-                                                            : 'border-transparent hover:border-gray-300'
-                                                    }`}
-                                                >
-                                                    <img
-                                                        src={`/storage/${image.image_path}`}
-                                                        alt={image.caption || `Image ${index + 1}`}
-                                                        className="h-full w-full object-cover"
-                                                    />
-                                                </button>
-                                            ))}
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
+                {/* Hero Image */}
+                <div className="relative h-[500px] w-full overflow-hidden bg-gray-900">
+                    {heroImage ? (
+                        <>
+                            <img
+                                src={heroImage.startsWith('/') ? heroImage : `/storage/${heroImage}`}
+                                alt={resort.resort_name}
+                                className="h-full w-full object-cover opacity-90"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                            <div className="absolute bottom-0 left-0 right-0 px-6 pb-12">
+                                <div className="mx-auto max-w-7xl">
+                                    <h1 className="text-5xl font-bold text-white">{resort.resort_name}</h1>
+                                </div>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="flex h-full w-full items-center justify-center">
+                            <div className="text-center">
+                                <h1 className="text-5xl font-bold text-white">{resort.resort_name}</h1>
+                            </div>
                         </div>
                     )}
+                </div>
 
-                    <div className="grid gap-6 lg:grid-cols-3">
-                        {/* Left Column - Booking Form */}
-                        <div className="lg:col-span-2">
-                            <form onSubmit={handleSubmit}>
+                <div className="mx-auto max-w-7xl px-6 py-8">
+                    <div className="grid gap-8 lg:grid-cols-2">
+                        {/* Left Column - Description & 2x2 Image Gallery */}
+                        <div className="space-y-6">
+                            {/* Description */}
+                            <div className="rounded-lg bg-white p-6 shadow-sm">
+                                <h2 className="mb-3 text-2xl font-semibold text-gray-900">About {resort.resort_name}</h2>
+                                <p className="text-gray-600 leading-relaxed">{getDescription()}</p>
+                            </div>
+
+                            {/* 2x2 Image Gallery */}
+                            {galleryImages.length > 0 && (
+                                <div>
+                                    <h3 className="mb-4 text-xl font-semibold text-gray-900">Gallery</h3>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {galleryImages.map((image, index) => (
+                                            <div
+                                                key={image.id}
+                                                className="group relative aspect-square overflow-hidden rounded-lg shadow-md transition-transform hover:scale-105"
+                                            >
+                                                <img
+                                                    src={`/storage/${image.image_path}`}
+                                                    alt={image.caption || `${resort.resort_name} image ${index + 1}`}
+                                                    className="h-full w-full object-cover"
+                                                />
+                                                {image.caption && (
+                                                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3 opacity-0 transition-opacity group-hover:opacity-100">
+                                                        <p className="text-sm text-white">{image.caption}</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Right Column - Reservation Form */}
+                        <div className="space-y-6">
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                {/* Reservation Details Card */}
                                 <Card>
                                     <CardHeader>
                                         <CardTitle>Reservation Details</CardTitle>
@@ -291,11 +320,11 @@ export default function ResortBooking() {
                                     </CardHeader>
                                     <CardContent className="space-y-6">
                                         {/* Date Selection */}
-                                        <div className="grid gap-4 md:grid-cols-2">
+                                        <div className="grid gap-4 sm:grid-cols-2">
                                             <div className="space-y-2">
                                                 <Label htmlFor="checkin">Check-in Date</Label>
                                                 <div className="relative">
-                                                    <Calendar className="absolute top-3 left-3 h-4 w-4 text-gray-500" />
+                                                    <Calendar className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                                                     <Input
                                                         id="checkin"
                                                         type="date"
@@ -310,7 +339,7 @@ export default function ResortBooking() {
                                             <div className="space-y-2">
                                                 <Label htmlFor="checkout">Check-out Date</Label>
                                                 <div className="relative">
-                                                    <Calendar className="absolute top-3 left-3 h-4 w-4 text-gray-500" />
+                                                    <Calendar className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                                                     <Input
                                                         id="checkout"
                                                         type="date"
@@ -332,12 +361,12 @@ export default function ResortBooking() {
                                             </div>
                                             <div className="space-y-3">
                                                 {entrance_fees.map((fee) => (
-                                                    <div key={fee.id} className="flex items-center justify-between rounded-lg border p-4">
+                                                    <div key={fee.id} className="flex items-center justify-between rounded-lg border p-3">
                                                         <div className="flex-1">
                                                             <p className="font-medium">{fee.category}</p>
-                                                            <p className="text-sm text-gray-500">{fee.description}</p>
+                                                            <p className="text-xs text-gray-500">{fee.description}</p>
                                                             <p className="mt-1 text-sm font-semibold text-emerald-600">
-                                                                ₱{parseFloat(fee.amount).toFixed(2)} per person
+                                                                ₱{parseFloat(fee.amount).toFixed(2)}
                                                             </p>
                                                         </div>
                                                         <Input
@@ -359,109 +388,131 @@ export default function ResortBooking() {
                                                 <span className="text-2xl font-bold text-emerald-600">₱{totalAmount.toFixed(2)}</span>
                                             </div>
                                         </div>
-
-                                        {/* Payment Proof Upload */}
-                                        <div className="space-y-2">
-                                            <Label htmlFor="payment_proof">Upload Payment Proof</Label>
-                                            <p className="text-sm text-gray-500">
-                                                Scan the QR code on the right and upload your payment proof
-                                            </p>
-                                            <div className="flex items-center gap-4">
-                                                <Input
-                                                    id="payment_proof"
-                                                    type="file"
-                                                    accept="image/*"
-                                                    onChange={handleFileChange}
-                                                    className="hidden"
-                                                />
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    onClick={() => document.getElementById('payment_proof')?.click()}
-                                                    className="w-full"
-                                                >
-                                                    <Upload className="mr-2 h-4 w-4" />
-                                                    {paymentProof ? 'Change File' : 'Choose File'}
-                                                </Button>
-                                            </div>
-                                            {previewUrl && (
-                                                <div className="mt-4">
-                                                    <img
-                                                        src={previewUrl}
-                                                        alt="Payment proof preview"
-                                                        className="h-48 w-full rounded-lg object-cover"
-                                                    />
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700" size="lg" disabled={isSubmitting}>
-                                            {isSubmitting ? 'Processing...' : 'Reserve and Pay'}
-                                        </Button>
                                     </CardContent>
                                 </Card>
-                            </form>
-                        </div>
 
-                        {/* Right Column - Payment QR and Summary */}
-                        <div className="space-y-6">
-                            {/* QR Code */}
-                            {qrCodeUrl && (
+                                {/* Payment QR Code Card */}
+                                {qrCodeUrl && (
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle>Payment QR Code</CardTitle>
+                                            <CardDescription>Scan to pay ₱{totalAmount.toFixed(2)}</CardDescription>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <div className="flex justify-center rounded-lg bg-white p-6">
+                                                <img src={qrCodeUrl} alt="Payment QR Code" className="h-64 w-64 object-contain" />
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                )}
+
+                                {/* Payment Proof Upload */}
                                 <Card>
                                     <CardHeader>
-                                        <CardTitle>Payment QR Code</CardTitle>
-                                        <CardDescription>Scan to pay the entrance fee</CardDescription>
+                                        <CardTitle>Upload Payment Proof</CardTitle>
+                                        <CardDescription>Required to confirm your reservation</CardDescription>
                                     </CardHeader>
-                                    <CardContent>
-                                        <div className="flex justify-center rounded-lg bg-white p-4">
-                                            <img src={qrCodeUrl} alt="Payment QR Code" className="h-64 w-64 object-contain" />
+                                    <CardContent className="space-y-4">
+                                        <div className="flex items-center gap-4">
+                                            <Input
+                                                id="payment_proof"
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleFileChange}
+                                                className="hidden"
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() => document.getElementById('payment_proof')?.click()}
+                                                className="w-full"
+                                            >
+                                                <Upload className="mr-2 h-4 w-4" />
+                                                {paymentProof ? 'Change File' : 'Choose File'}
+                                            </Button>
                                         </div>
+                                        {previewUrl && (
+                                            <div className="overflow-hidden rounded-lg border">
+                                                <img
+                                                    src={previewUrl}
+                                                    alt="Payment proof preview"
+                                                    className="h-48 w-full object-cover"
+                                                />
+                                            </div>
+                                        )}
                                     </CardContent>
                                 </Card>
-                            )}
 
-                            {/* Resort Image */}
-                            {resort.img && (
+                                {/* Booking Summary Card */}
                                 <Card>
-                                    <CardContent className="p-0">
-                                        <img
-                                            src={resort.img}
-                                            alt={resort.resort_name}
-                                            className="h-48 w-full rounded-lg object-cover"
-                                        />
+                                    <CardHeader>
+                                        <CardTitle>Booking Summary</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-500">Resort</p>
+                                            <p className="text-lg font-semibold text-gray-900">{resort.resort_name}</p>
+                                        </div>
+                                        {checkInDate && checkOutDate && (
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-500">Visit Period</p>
+                                                <p className="font-medium text-gray-900">
+                                                    {new Date(checkInDate).toLocaleDateString('en-US', {
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                        year: 'numeric',
+                                                    })}{' '}
+                                                    -{' '}
+                                                    {new Date(checkOutDate).toLocaleDateString('en-US', {
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                        year: 'numeric',
+                                                    })}
+                                                </p>
+                                            </div>
+                                        )}
+                                        {Object.entries(guests).filter(([_, count]) => count > 0).length > 0 && (
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-500">Guests</p>
+                                                <div className="mt-1 space-y-1">
+                                                    {Object.entries(guests)
+                                                        .filter(([_, count]) => count > 0)
+                                                        .map(([category, count]) => {
+                                                            const fee = entrance_fees.find(f => f.category === category);
+                                                            const amount = fee ? parseFloat(fee.amount) * count : 0;
+                                                            return (
+                                                                <div key={category} className="flex justify-between text-sm">
+                                                                    <span className="text-gray-700">
+                                                                        {count} {category}
+                                                                    </span>
+                                                                    <span className="font-medium text-gray-900">
+                                                                        ₱{amount.toFixed(2)}
+                                                                    </span>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                </div>
+                                            </div>
+                                        )}
+                                        <div className="border-t pt-4">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-lg font-semibold text-gray-900">Total</span>
+                                                <span className="text-2xl font-bold text-emerald-600">₱{totalAmount.toFixed(2)}</span>
+                                            </div>
+                                        </div>
                                     </CardContent>
                                 </Card>
-                            )}
 
-                            {/* Booking Summary */}
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Booking Summary</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-3">
-                                    {checkInDate && checkOutDate && (
-                                        <div>
-                                            <p className="text-sm text-gray-500">Visit Period</p>
-                                            <p className="font-medium">
-                                                {new Date(checkInDate).toLocaleDateString()} -{' '}
-                                                {new Date(checkOutDate).toLocaleDateString()}
-                                            </p>
-                                        </div>
-                                    )}
-                                    {Object.entries(guests).filter(([_, count]) => count > 0).length > 0 && (
-                                        <div>
-                                            <p className="text-sm text-gray-500">Guests</p>
-                                            {Object.entries(guests)
-                                                .filter(([_, count]) => count > 0)
-                                                .map(([category, count]) => (
-                                                    <p key={category} className="font-medium">
-                                                        {count} {category}
-                                                    </p>
-                                                ))}
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
+                                {/* Submit Button */}
+                                <Button
+                                    type="submit"
+                                    className="w-full bg-emerald-600 hover:bg-emerald-700"
+                                    size="lg"
+                                    disabled={isSubmitting}
+                                >
+                                    {isSubmitting ? 'Processing...' : 'Confirm Reservation'}
+                                </Button>
+                            </form>
                         </div>
                     </div>
                 </div>
