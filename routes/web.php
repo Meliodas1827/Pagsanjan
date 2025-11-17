@@ -400,15 +400,16 @@ Route::middleware(['auth', 'verified', 'role:hotel'])->group(function () {
 });
 
 
+// Customer routes that don't require guest profile completion
 Route::middleware(['auth', 'verified', 'role:customer'])->group(function () {
-    Route::get('my-profile', [MyProfileController::class, 'create']);
+    Route::get('my-profile', [MyProfileController::class, 'create'])->name('my-profile');
     Route::post('my-profile-post', [MyProfileController::class, 'store'])->name('profile.post');
 
-    // Account Management
+    // Account Management - accessible even without guest profile
     Route::get('account', [\App\Http\Controllers\Customer\ProfileController::class, 'show'])->name('profile.account');
-    Route::put('account/profile', [\App\Http\Controllers\Customer\ProfileController::class, 'updateProfile'])->name('profile.update');
-    Route::put('account/password', [\App\Http\Controllers\Customer\ProfileController::class, 'updatePassword'])->name('profile.password');
-    Route::delete('account', [\App\Http\Controllers\Customer\ProfileController::class, 'deleteAccount'])->name('profile.delete');
+    Route::put('account/profile', [\App\Http\Controllers\Customer\ProfileController::class, 'updateProfile'])->name('account.profile.update');
+    Route::put('account/password', [\App\Http\Controllers\Customer\ProfileController::class, 'updatePassword'])->name('account.password.update');
+    Route::delete('account', [\App\Http\Controllers\Customer\ProfileController::class, 'deleteAccount'])->name('account.delete');
 });
 
 // landing form (user);

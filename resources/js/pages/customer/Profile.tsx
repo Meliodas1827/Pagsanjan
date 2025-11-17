@@ -44,20 +44,39 @@ export default function Profile({ user }: Props) {
 
     const handleProfileSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        profileForm.put(route('profile.update'), {
+
+        console.log('Submitting profile update:', profileForm.data);
+
+        profileForm.put(route('account.profile.update'), {
+            preserveScroll: true,
             onSuccess: () => {
                 toast.success('Profile updated successfully!');
+                console.log('Profile update successful');
             },
             onError: (errors) => {
-                toast.error('Failed to update profile');
-                console.error(errors);
+                console.error('Profile update errors:', errors);
+
+                // Show specific error messages
+                if (errors.name) {
+                    toast.error(errors.name);
+                } else if (errors.email) {
+                    toast.error(errors.email);
+                } else if (errors.phone) {
+                    toast.error(errors.phone);
+                } else if (errors.address) {
+                    toast.error(errors.address);
+                } else if (errors.error) {
+                    toast.error(errors.error);
+                } else {
+                    toast.error('Failed to update profile. Please check the form and try again.');
+                }
             },
         });
     };
 
     const handlePasswordSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        passwordForm.put(route('profile.password'), {
+        passwordForm.put(route('account.password.update'), {
             onSuccess: () => {
                 toast.success('Password changed successfully!');
                 passwordForm.reset();
@@ -73,7 +92,7 @@ export default function Profile({ user }: Props) {
     };
 
     const handleDeleteAccount = () => {
-        router.delete(route('profile.delete'), {
+        router.delete(route('account.delete'), {
             data: { password: deletePassword },
             onSuccess: () => {
                 toast.success('Account deleted successfully');

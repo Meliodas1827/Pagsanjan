@@ -17,11 +17,16 @@ class ProfileMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         $user = Auth::user();
- 
-        // Only check if user is logged in and role is 'customer' (e.g. role_id = 3)
-        if ($user && $user->role_id === 3 && !$user->guest) {
+
+        // Only check if user is logged in, role is 'customer' (role_id = 3),
+        // email is verified, and guest profile is not completed
+        if ($user &&
+            $user->role_id === 3 &&
+            $user->hasVerifiedEmail() &&
+            !$user->guest &&
+            !$request->is('my-profile', 'my-profile-post', 'logout', 'account', 'account/*')) {
             return redirect('/my-profile')
-                ->with('warning', 'Please complete your customer information.');
+                ->with('warning', 'Please complete your customer information before continuing.');
         }
 
         return $next($request);

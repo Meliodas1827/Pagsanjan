@@ -16,13 +16,22 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
 
+        // Get phone and address from guest profile if available, otherwise from user table
+        $phone = $user->phone;
+        $address = $user->address;
+
+        if ($user->guest) {
+            $phone = $user->guest->phone ?? $user->phone;
+            $address = $user->guest->address ?? $user->address;
+        }
+
         return Inertia::render('customer/Profile', [
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
-                'phone' => $user->phone,
-                'address' => $user->address,
+                'phone' => $phone,
+                'address' => $address,
                 'created_at' => $user->created_at->format('F d, Y'),
             ],
         ]);
@@ -32,16 +41,55 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
 
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'address' => ['nullable', 'string', 'max:500'],
+        // Debug logging
+        \Log::info('Account profile update attempt', [
+            'user_id' => $user->id,
+            'request_data' => $request->all(),
         ]);
 
-        $user->update($validated);
+        try {
+            $validated = $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+                'phone' => ['nullable', 'string', 'max:20'],
+                'address' => ['nullable', 'string', 'max:500'],
+            ], [
+                'name.required' => 'Name is required.',
+                'name.max' => 'Name cannot exceed 255 characters.',
+                'email.required' => 'Email is required.',
+                'email.email' => 'Please provide a valid email address.',
+                'email.unique' => 'This email is already in use.',
+                'phone.max' => 'Phone number cannot exceed 20 characters.',
+                'address.max' => 'Address cannot exceed 500 characters.',
+            ]);
 
-        return redirect()->back()->with('success', 'Profile updated successfully!');
+            $user->update($validated);
+
+            // Also update guest table if guest profile exists
+            if ($user->guest) {
+                $user->guest->update([
+                    'phone' => $validated['phone'],
+                    'address' => $validated['address'],
+                ]);
+            }
+
+            \Log::info('Account profile updated successfully', ['user_id' => $user->id]);
+
+            return redirect()->back()->with('success', 'Profile updated successfully!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::warning('Account profile validation failed', [
+                'user_id' => $user->id,
+                'errors' => $e->errors(),
+            ]);
+            throw $e;
+        } catch (\Exception $e) {
+            \Log::error('Account profile update error', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return redirect()->back()->withErrors(['error' => 'An error occurred while updating your profile. Please try again.']);
+        }
     }
 
     public function updatePassword(Request $request)
