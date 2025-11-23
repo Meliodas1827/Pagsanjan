@@ -21,8 +21,9 @@ class RestaurantListController extends Controller
 
                 return [
                     'id' => $restaurant->id,
-                    'resto_name' => $restaurant->resto_name,
-                    'img' => $restaurant->img,
+                    'name' => $restaurant->resto_name,
+                    'description' => null,
+                    'image' => $restaurant->img,
                     'payment_qr' => $restaurant->payment_qr,
                     'deleted' => $restaurant->deleted,
                     'resto_tables' => $activeTables->values(),
@@ -31,8 +32,9 @@ class RestaurantListController extends Controller
                 ];
             });
 
-        return Inertia::render('customer/RestaurantList', [
-            'restaurants' => $restaurants
+        return Inertia::render('customer/AccommodationPage', [
+            'restaurants' => $restaurants,
+            'role' => auth()->check() ? auth()->user()->role_id : null
         ]);
     }
 }

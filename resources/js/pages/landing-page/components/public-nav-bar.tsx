@@ -26,7 +26,7 @@ const PublicNavBar: React.FC<navProps> = ({ role }) => {
     const linkPrefix = isLandingPage ? '' : '/';
 
     return (
-        <nav className="w-full bg-[#18371e] text-white">
+        <nav className="sticky top-0 z-50 w-full bg-[#18371e] text-white">
             <div className="container mx-auto px-4">
                 <div className="flex h-16 items-center justify-between">
                     {/* Logo Section */}
@@ -61,25 +61,25 @@ const PublicNavBar: React.FC<navProps> = ({ role }) => {
                                 <NavigationMenuContent>
                                     <div className="w-64 rounded-md bg-green-600 p-2">
                                         <NavigationMenuLink
-                                            href={`${linkPrefix}#landing-area`}
+                                            href="/landing-areas"
                                             className="hover:bg-opacity-10 block rounded px-4 py-2 text-white transition-colors duration-200 hover:bg-white hover:text-green-900"
                                         >
                                             Landing Area
                                         </NavigationMenuLink>
                                         <NavigationMenuLink
-                                            href={`${linkPrefix}#hotel`}
+                                            href="/hotel-list"
                                             className="hover:bg-opacity-10 block rounded px-4 py-2 text-white transition-colors duration-200 hover:bg-white hover:text-green-900"
                                         >
                                             Hotel
                                         </NavigationMenuLink>
                                         <NavigationMenuLink
-                                            href={`${linkPrefix}#restaurant`}
+                                            href="/restaurant-list"
                                             className="hover:bg-opacity-10 block rounded px-4 py-2 text-white transition-colors duration-200 hover:bg-white hover:text-green-900"
                                         >
                                             Restaurant
                                         </NavigationMenuLink>
                                         <NavigationMenuLink
-                                            href={`${linkPrefix}#resort`}
+                                            href="/resort-list"
                                             className="hover:bg-opacity-10 block rounded px-4 py-2 text-white transition-colors duration-200 hover:bg-white hover:text-green-900"
                                         >
                                             Resort

@@ -49,6 +49,9 @@ use App\Http\Controllers\Resort\ResortPaymentQRController;
 use App\Http\Controllers\Resort\ResortEntranceFeeController;
 use App\Http\Controllers\Resort\ResortImageController;
 use App\Http\Controllers\Customer\CustomerResortBookingController;
+use App\Http\Controllers\customer\LandingAreaListController;
+use App\Http\Controllers\Customer\HotelListController;
+use App\Http\Controllers\Customer\ResortListController;
 use App\Http\Controllers\Shared\DashboardController;
 use App\Http\Controllers\Ubaap\BoatAssignController;
 use App\Http\Controllers\Ubaap\MessageController;
@@ -173,6 +176,21 @@ Route::group([], function () {
 
     Route::get('/restaurant-list', [RestaurantListController::class, 'index'])
         ->name('restaurant-list');
+
+    Route::get('/landing-areas', [LandingAreaListController::class, 'index'])
+        ->name('landings-list');
+
+    Route::get('/hotel-list', [HotelListController::class, 'index'])
+        ->name('hotels-list');
+
+    Route::get('/resort-list', [ResortListController::class, 'index'])
+        ->name('resorts-list');
+
+    // Route::get('/accommodation-preview', function () {
+    //     return Inertia::render('landing-page/components/AccommodationPage', [
+    //         'role' => auth()->check() ? auth()->user()->role_id : null
+    //     ]);
+    // })->name('accommodation.preview');
 });
 
 

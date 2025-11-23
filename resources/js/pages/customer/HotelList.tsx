@@ -1,79 +1,219 @@
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { type SharedData } from '@/types';
-import { Head, Link, router, usePage } from '@inertiajs/react';
-import { LogOut, NotebookTabs, User, UserRoundCog } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { SharedData } from '@/types';
+import { Head, Link, usePage } from '@inertiajs/react';
+import { Building2, MapPin, Search } from 'lucide-react';
+import { useState } from 'react';
+import PublicNavBar from '../landing-page/components/public-nav-bar';
 
-const PublicNavBar = ({ role }: { role: number }) => {
-    const handleLogout = () => {
-        router.post(route('logout'));
-        router.flushAll();
+interface Hotel {
+    id: number;
+    hotel_name: string;
+    location: string | null;
+    description: string | null;
+    image_url: string | null;
+}
+
+interface Props {
+    hotels: Hotel[];
+}
+
+const ContactSection = () => {
+    const [email, setEmail] = useState('');
+
+    const handleSubscribe = (e: React.FormEvent) => {
+        e.preventDefault();
+        // Handle subscription logic here
+        console.log('Subscribing email:', email);
+        setEmail('');
     };
 
     return (
-        <nav className="w-full bg-[#18371e] text-white">
-            <div className="container mx-auto px-4">
-                <div className="flex h-16 items-center justify-between">
-                    {/* Logo Section */}
-                    <Link href="/" className="flex items-center space-x-2">
-                        <div className="bg-opacity-20 flex h-12 w-13 items-center justify-center rounded">
-                            <img src="/images/logo.png" alt="logo" title="logo" />
+        <>
+            {/* Footer Section */}
+            <footer className="bg-[#5a5a5a] py-12 text-white">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div className="grid gap-8 md:grid-cols-3">
+                        {/* Column 1 - Logo & Location */}
+                        <div className="text-center md:text-left">
+                            <div className="mb-4 flex justify-center md:justify-start">
+                                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10">
+                                    <img src="/images/logo.png" alt="Pagsanjan Falls" className="h-12 w-12" />
+                                </div>
+                            </div>
+                            <p className="text-sm text-white/90">
+                                Municipality of Pagsanjan,
+                                <br />
+                                Laguna, Philippines
+                            </p>
                         </div>
-                        <div className="font-bold text-white">
-                            <div className="text-lg leading-tight">PAGSANJAN</div>
-                            <div className="text-sm leading-tight">FALLS RESORT</div>
-                        </div>
-                    </Link>
 
-                    {/* User Menu */}
-                    {role > 0 && (
-                        <DropdownMenu>
-                            <DropdownMenuTrigger className="hover:bg-opacity-10 flex items-center space-x-2 rounded-md px-3 py-2 text-white transition-colors hover:bg-white">
-                                <User className="h-5 w-5" />
-                                <span>Account</span>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                                <DropdownMenuItem asChild>
-                                    <Link href={route('dashboard')} className="flex w-full items-center">
-                                        <NotebookTabs className="mr-2 h-4 w-4" />
-                                        <span>My Bookings</span>
-                                    </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                    <Link href={route('profile.edit')} className="flex w-full items-center">
-                                        <UserRoundCog className="mr-2 h-4 w-4" />
-                                        <span>Account</span>
-                                    </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={handleLogout} className="flex w-full items-center">
-                                    <LogOut className="mr-2 h-4 w-4" />
-                                    <span>Logout</span>
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    )}
+                        {/* Column 2 - Navigation Links */}
+                        <div className="text-start">
+                            <nav className="space-y-2">
+                                <a href="/#about" className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]">
+                                    ABOUT US
+                                </a>
+                                <a href="/#activities" className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]">
+                                    ACTIVITIES
+                                </a>
+                                <a href="/#contact" className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]">
+                                    CONTACT US
+                                </a>
+                                <a href="/#faqs" className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]">
+                                    FAQS
+                                </a>
+                                <a href="/data-privacy" className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]">
+                                    PRIVACY POLICY
+                                </a>
+                                <a href="/terms-conditions" className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]">
+                                    TERMS AND CONDITIONS
+                                </a>
+                            </nav>
+                        </div>
+
+                        {/* Column 3 - Newsletter Signup */}
+                        <div>
+                            <h3 className="mb-3 text-sm font-semibold">Be the first to discover exclusive deals. Subscribe now!</h3>
+                            <form onSubmit={handleSubscribe} className="space-y-3">
+                                <div className="flex flex-col gap-2 sm:flex-row">
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        placeholder="Enter your email"
+                                        required
+                                        className="flex-1 border-0 bg-white px-4 py-2 text-sm text-gray-900 placeholder:text-gray-500 focus:ring-2 focus:ring-[#2d5f5d] focus:outline-none"
+                                    />
+                                    <button
+                                        type="submit"
+                                        className="rounded-md bg-[#2d5f5d] px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#3d6b68]"
+                                    >
+                                        Subscribe
+                                    </button>
+                                </div>
+                                <p className="text-xs text-white/70">
+                                    By subscribing to our mailing list, you agree with our{' '}
+                                    <a href="/data-privacy" className="underline hover:text-white">
+                                        Privacy Policy
+                                    </a>
+                                </p>
+                            </form>
+                        </div>
+                    </div>
+
+                    {/* Bottom Bar */}
+                    <div className="mt-12 border-t border-white/20 pt-8 text-center">
+                        <p className="text-sm text-white/70">COPYRIGHT PAGSANJAN FALLS 2025</p>
+                    </div>
                 </div>
-            </div>
-        </nav>
+            </footer>
+        </>
     );
 };
 
-export default function HotelList() {
+export default function HotelList({ hotels = [] }: Props) {
     const { auth } = usePage<SharedData>().props;
     const user = auth?.user?.role_id ?? 0;
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const filteredHotels = hotels.filter((hotel) => hotel.hotel_name.toLowerCase().includes(searchTerm.toLowerCase()));
 
     return (
         <>
-            <Head title="Hotel List" />
+            <Head title="Hotels" />
             <PublicNavBar role={user} />
-            <div className="min-h-screen bg-gray-50">
-                <h1 className="mb-4 text-xl font-bold">Hotel List</h1>
-                <Button onClick={() => console.log('Add Hotel clicked')}>Add Hotel</Button>
+            <div className="min-h-screen bg-white">
+                {/* Hero Background - Full Width */}
+                <div className="relative h-[50vh] w-full">
+                    <img src="/images/mainbg.jpg" alt="Hotels" className="h-full w-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/10"></div>
+                </div>
 
-                <ul className="mt-4 space-y-2">
-                    <li>Pagsanjan One's Hotel</li>
-                    <li>Another Hotel</li>
-                </ul>
+                {/* White Content Card Overlaying Bottom of Hero */}
+                <div className="relative -mt-32 min-h-screen bg-white">
+                    <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+                        <div className="rounded-t-3xl bg-white px-8 py-12 shadow-2xl md:px-16 md:py-16">
+                            {/* Header Section */}
+                            <div className="mb-12">
+                                <h1 className="mb-4 text-center font-serif text-5xl font-bold text-gray-900 md:text-6xl">Hotels</h1>
+                                <p className="mb-8 text-center text-lg text-gray-600">
+                                    Experience comfort and luxury in our well-appointed hotel rooms
+                                </p>
+
+                                {/* Search Bar */}
+                                <div className="relative mx-auto max-w-xl">
+                                    <Search className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                                    <Input
+                                        placeholder="Search hotels..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="h-12 rounded-full bg-gray-50 pl-12 text-base"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Hotels - Vertical Layout */}
+                            <div className="space-y-12">
+                                {filteredHotels.length === 0 ? (
+                                    <div className="py-12 text-center text-gray-500">
+                                        {searchTerm ? 'No hotels found matching your search.' : 'No hotels available at the moment.'}
+                                    </div>
+                                ) : (
+                                    filteredHotels.map((hotel, index) => (
+                                        <div
+                                            key={hotel.id}
+                                            className={`grid gap-8 rounded-2xl bg-white p-6 shadow-lg transition-all duration-300 hover:shadow-2xl md:grid-cols-2 md:gap-12 md:p-8 ${
+                                                index % 2 === 0 ? '' : 'md:grid-flow-dense'
+                                            }`}
+                                        >
+                                            {/* Description Section */}
+                                            <div className={`flex flex-col justify-center space-y-4 ${index % 2 === 0 ? '' : 'md:col-start-2'}`}>
+                                                <div className="mb-2">
+                                                    <h3 className="mb-3 flex items-center gap-2 text-2xl font-bold text-gray-900 md:text-3xl">
+                                                        <Building2 className="h-6 w-6 text-green-600" />
+                                                        {hotel.hotel_name}
+                                                    </h3>
+                                                    {hotel.description && <p className="text-gray-700">{hotel.description}</p>}
+                                                </div>
+
+                                                {hotel.location && (
+                                                    <div className="border-t border-gray-200 pt-4">
+                                                        <div className="flex items-start gap-3 text-gray-700">
+                                                            <MapPin className="mt-1 h-5 w-5 flex-shrink-0 text-gray-400" />
+                                                            <span>{hotel.location}</span>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Image and Button Section */}
+                                            <div className={`flex flex-col gap-4 ${index % 2 === 0 ? '' : 'md:col-start-1 md:row-start-1'}`}>
+                                                <div className="relative overflow-hidden rounded-xl bg-gray-200 shadow-md">
+                                                    {hotel.image_url ? (
+                                                        <img
+                                                            src={hotel.image_url}
+                                                            alt={hotel.hotel_name}
+                                                            className="h-80 w-full object-cover transition-transform duration-500 hover:scale-105 md:h-96"
+                                                        />
+                                                    ) : (
+                                                        <div className="flex h-80 w-full items-center justify-center bg-gradient-to-br from-green-100 to-green-200 md:h-96">
+                                                            <Building2 className="h-24 w-24 text-green-600 opacity-50" />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <Button asChild size="lg" className="w-full bg-[#2d5f5d] text-lg hover:bg-[#3d6b68]">
+                                                    <Link href={`/hotel/${hotel.id}`}>Book Now</Link>
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                    <ContactSection />
+                </div>
             </div>
         </>
     );

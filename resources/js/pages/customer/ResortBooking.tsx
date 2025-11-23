@@ -214,7 +214,7 @@ export default function ResortBooking() {
     };
 
     const totalAmount = calculateTotal();
-    const qrCodeUrl = resort.payment_qr ? `/storage/${resort.payment_qr}` : null;
+    const qrCodeUrl = resort.payment_qr ? resort.payment_qr : null;
 
     // Get hero image - use main resort image
     const heroImage = resort.img;

@@ -66,25 +66,25 @@ const PublicNavBar = ({ role }: { role: number }) => {
                                 <NavigationMenuContent>
                                     <div className="w-64 rounded-md bg-green-600 p-2">
                                         <NavigationMenuLink
-                                            href={`${linkPrefix}#landing-area`}
+                                            href="/landing-areas"
                                             className="hover:bg-opacity-10 block rounded px-4 py-2 text-white transition-colors duration-200 hover:bg-white hover:text-green-900"
                                         >
                                             Landing Area
                                         </NavigationMenuLink>
                                         <NavigationMenuLink
-                                            href={`${linkPrefix}#hotel`}
+                                            href="/hotel-list"
                                             className="hover:bg-opacity-10 block rounded px-4 py-2 text-white transition-colors duration-200 hover:bg-white hover:text-green-900"
                                         >
                                             Hotel
                                         </NavigationMenuLink>
                                         <NavigationMenuLink
-                                            href={`${linkPrefix}#restaurant`}
+                                            href="/restaurant-list"
                                             className="hover:bg-opacity-10 block rounded px-4 py-2 text-white transition-colors duration-200 hover:bg-white hover:text-green-900"
                                         >
                                             Restaurant
                                         </NavigationMenuLink>
                                         <NavigationMenuLink
-                                            href={`${linkPrefix}#resort`}
+                                            href="/resort-list"
                                             className="hover:bg-opacity-10 block rounded px-4 py-2 text-white transition-colors duration-200 hover:bg-white hover:text-green-900"
                                         >
                                             Resort
@@ -266,75 +266,524 @@ const SlidingGallery = () => {
 
 // About Section Component
 const AboutSection = () => {
+    const galleryImages = [
+        { src: '/images/couple.png', alt: 'Couple enjoying the tour' },
+        { src: '/images/download.png', alt: 'Waterfall view' },
+        { src: '/images/res.png', alt: 'Restaurant' },
+        { src: '/images/bamboo.png', alt: 'Bamboo scenery' },
+        { src: '/images/bed.png', alt: 'Comfortable rooms' },
+        { src: '/images/pool.png', alt: 'Swimming pool' },
+        { src: '/images/room.png', alt: 'Resort room' },
+    ];
+
+    const [isDragging, setIsDragging] = useState(false);
+    const [startX, setStartX] = useState(0);
+    const [scrollLeft, setScrollLeft] = useState(0);
+    const [scrollContainerRef, setScrollContainerRef] = useState<HTMLDivElement | null>(null);
+
+    const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!scrollContainerRef) return;
+        setIsDragging(true);
+        setStartX(e.pageX - scrollContainerRef.offsetLeft);
+        setScrollLeft(scrollContainerRef.scrollLeft);
+    };
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!isDragging || !scrollContainerRef) return;
+        e.preventDefault();
+        const x = e.pageX - scrollContainerRef.offsetLeft;
+        const walk = (x - startX) * 2;
+        scrollContainerRef.scrollLeft = scrollLeft - walk;
+    };
+
+    const handleMouseUp = () => {
+        setIsDragging(false);
+    };
+
+    const handleMouseLeave = () => {
+        setIsDragging(false);
+    };
+
     return (
-        <section id="about" className="bg-white py-20 scroll-mt-16">
+        <section id="about" className="scroll-mt-16 bg-[#093517] py-20">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="mb-16 text-center">
-                    <h2 className="mb-4 text-4xl font-light text-gray-900">Pagsanjan Falls Resort</h2>
-                    <p className="mx-auto max-w-3xl text-xl text-gray-600">
-                        Experience the thrill of navigating through the famous Pagsanjan Falls with our expertly guided boat tours. Discover the
-                        natural beauty of this world-renowned destination in the heart of Laguna, Philippines.
+                    <h2 className="mb-4 text-4xl font-light text-white">Pagsanjan Falls Resort</h2>
+                    <p className="mx-auto text-sm text-white">
+                        Hidden in the heart of Laguna, Pagsanjan Falls is a breathtaking natural wonder that offers an unforgettable adventure for
+                        every traveler. Experience the thrill of the legendary boat ride, guided by skilled boatmen who navigate through scenic river
+                        rapids, leading to the majestic three-tiered waterfall. Surrounded by lush greenery and towering rock formations, Pagsanjan
+                        Falls is more than just a tourist destination—it's a gateway to nature, culture, and sustainable ecotourism. With the support
+                        of local resorts and the United Boatmen Association of Pagsanjan (UBAP), every visit contributes to the preservation of this
+                        iconic landmark and the livelihood of the community.
+                    </p>
+
+                    <br />
+                    <p className="mx-auto max-w-3xl text-sm font-bold text-white">
+                        Create a wonderful and meaningful experience with your friends, family and loved ones and even yourself
                     </p>
                 </div>
 
-                <div className="mb-16 grid gap-8 md:grid-cols-3">
-                    <AnimatedContent
-                        distance={150}
-                        direction="vertical"
-                        reverse={false}
-                        duration={1.2}
-                        ease="power3.out"
-                        initialOpacity={0.2}
-                        animateOpacity
-                        scale={1.1}
-                        threshold={0.2}
-                        delay={0.3}
+                {/* Draggable Gallery */}
+                <div className="relative">
+                    <div
+                        ref={setScrollContainerRef}
+                        className="cursor-grab overflow-x-scroll active:cursor-grabbing"
+                        style={{
+                            scrollbarWidth: 'none',
+                            msOverflowStyle: 'none',
+                        }}
+                        onMouseDown={handleMouseDown}
+                        onMouseMove={handleMouseMove}
+                        onMouseUp={handleMouseUp}
+                        onMouseLeave={handleMouseLeave}
                     >
-                        {' '}
-                        <div className="text-center">
-                            <img src="/images/couple.png" alt="Boat Tour" className="mb-4 h-48 w-full rounded-lg object-cover" />
-                            <h3 className="mb-2 text-xl font-semibold">Exciting Boat Tours</h3>
-                            <p className="text-gray-600">Navigate through rapids with experienced boatmen on traditional bancas</p>
+                        <style>
+                            {`
+                                .overflow-x-scroll::-webkit-scrollbar {
+                                    display: none;
+                                }
+                            `}
+                        </style>
+                        <div className="flex gap-4 pb-4 select-none">
+                            {galleryImages.map((image, index) => (
+                                <AnimatedContent
+                                    key={index}
+                                    distance={150}
+                                    direction="vertical"
+                                    reverse={false}
+                                    duration={1.2}
+                                    ease="power3.out"
+                                    initialOpacity={0.2}
+                                    animateOpacity
+                                    scale={1.1}
+                                    threshold={0.2}
+                                    delay={0.1 * index}
+                                >
+                                    <div className="w-72 flex-shrink-0">
+                                        <img
+                                            src={image.src}
+                                            alt={image.alt}
+                                            className="pointer-events-none h-56 w-full rounded-lg object-cover shadow-lg transition-transform hover:scale-105"
+                                            draggable="false"
+                                        />
+                                    </div>
+                                </AnimatedContent>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Drag indicator */}
+                    <div className="mt-4 text-center">
+                        <p className="text-xs text-white/60">← Drag to view more →</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+};
+
+// Experience Section Component
+const ExperienceSection = () => {
+    const experiences = [
+        {
+            image: '/images/room.png',
+            title: 'Luxurious Accommodations',
+            description:
+                'Rest in comfort after your adventure. Our rooms feature modern amenities, plush bedding, and stunning views of the surrounding nature.',
+        },
+        {
+            image: '/images/res.png',
+            title: 'Authentic Local Cuisine',
+            description:
+                'Savor the flavors of Laguna with our carefully crafted dishes. Fresh ingredients and traditional recipes bring you the best of Filipino hospitality.',
+        },
+        {
+            image: '/images/pool.png',
+            title: 'Resort Relaxation',
+            description:
+                'Unwind by our pristine pool surrounded by tropical gardens. Perfect for families and groups seeking relaxation and fun under the sun.',
+        },
+    ];
+
+    return (
+        <section className="bg-gradient-to-b from-white to-gray-50 py-20">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="mb-16 text-center">
+                    <h2 className="mb-4 text-4xl font-bold text-gray-900">Experience Paradise</h2>
+                    <p className="mx-auto max-w-3xl text-xl text-gray-600">
+                        Discover the perfect blend of adventure, comfort, and authentic Filipino hospitality
+                    </p>
+                </div>
+
+                <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                    {experiences.map((experience, index) => (
+                        <AnimatedContent
+                            key={index}
+                            distance={100}
+                            direction="vertical"
+                            reverse={false}
+                            duration={1}
+                            ease="power3.out"
+                            initialOpacity={0}
+                            animateOpacity
+                            scale={1.05}
+                            threshold={0.2}
+                            delay={0.1 * index}
+                        >
+                            <div className="overflow-hidden rounded-2xl bg-white shadow-lg transition-all hover:shadow-2xl">
+                                <div className="aspect-square overflow-hidden">
+                                    <img
+                                        src={experience.image}
+                                        alt={experience.title}
+                                        className="h-full w-full object-cover transition-transform duration-500 hover:scale-110"
+                                    />
+                                </div>
+                                <div className="p-6">
+                                    <h3 className="mb-3 text-xl font-bold text-gray-900">{experience.title}</h3>
+                                    <p className="text-gray-600">{experience.description}</p>
+                                </div>
+                            </div>
+                        </AnimatedContent>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+};
+
+// Mini Feature Section Component
+const MiniFeatureSection = () => {
+    return (
+        <section className="bg-[#062d19] py-12">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="grid items-center gap-8 lg:grid-cols-2">
+                    <AnimatedContent
+                        distance={100}
+                        direction="horizontal"
+                        reverse={false}
+                        duration={1}
+                        ease="power3.out"
+                        initialOpacity={0}
+                        animateOpacity
+                        threshold={0.3}
+                    >
+                        <div className="space-y-4">
+                            <h2 className="text-3xl font-bold text-white">Discover the Adventure of a Lifetime</h2>
+                            <p className="text-base leading-relaxed text-white">
+                                Navigate through the stunning rapids of Pagsanjan Falls with our expert boatmen. Experience the thrill of the journey
+                                as you make your way through lush tropical scenery, towering rock formations, and pristine waters.
+                            </p>
+                            <div className="flex flex-wrap gap-3">
+                                <div className="flex items-center gap-2 text-sm text-white">
+                                    <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span>Expert Local Guides</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm text-white">
+                                    <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span>Safe & Memorable</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm text-white">
+                                    <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span>Eco-Friendly Tourism</span>
+                                </div>
+                            </div>
                         </div>
                     </AnimatedContent>
+
                     <AnimatedContent
-                        distance={150}
-                        direction="vertical"
-                        reverse={false}
-                        duration={1.2}
+                        distance={100}
+                        direction="horizontal"
+                        reverse={true}
+                        duration={1}
                         ease="power3.out"
-                        initialOpacity={0.2}
+                        initialOpacity={0}
                         animateOpacity
-                        scale={1.1}
-                        threshold={0.2}
-                        delay={0.3}
+                        threshold={0.3}
                     >
-                        {' '}
-                        <div className="text-center">
-                            <img src="/images/download.png" alt="Falls" className="mb-4 h-48 w-full rounded-lg object-cover" />
-                            <h3 className="mb-2 text-xl font-semibold">Magnificent Falls</h3>
-                            <p className="text-gray-600">Witness the breathtaking 100-foot waterfall cascading into emerald pools</p>
+                        <div className="relative h-64 overflow-hidden rounded-2xl shadow-2xl lg:h-80">
+                            <img
+                                src="/images/bamboo.png"
+                                alt="Pagsanjan Adventure"
+                                className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                         </div>
                     </AnimatedContent>
-                    <AnimatedContent
-                        distance={150}
-                        direction="vertical"
-                        reverse={false}
-                        duration={1.2}
-                        ease="power3.out"
-                        initialOpacity={0.2}
-                        animateOpacity
-                        scale={1.1}
-                        threshold={0.2}
-                        delay={0.3}
+                </div>
+            </div>
+        </section>
+    );
+};
+
+// Gallery Cards Section Component
+const GalleryCardsSection = () => {
+    const [currentIndex, setCurrentIndex] = useState(0);
+
+    const galleryCards = [
+        {
+            image: '/images/room.png',
+            title: 'Hotel Rooms',
+            description: 'Experience comfort and luxury in our well-appointed hotel rooms with modern amenities and stunning views.',
+            buttonText: 'Explore Rooms',
+            link: '/hotel-list',
+        },
+        {
+            image: '/images/bamboo.png',
+            title: 'Landing Areas',
+            description: 'Discover scenic boat ride destinations and explore the natural beauty of Pagsanjan from the water.',
+            buttonText: 'View Destinations',
+            link: '/landing-areas',
+        },
+        {
+            image: '/images/res.png',
+            title: 'Restaurant',
+            description: 'Indulge in authentic Filipino cuisine prepared with fresh local ingredients and traditional recipes.',
+            buttonText: 'See Menu',
+            link: '/restaurant-list',
+        },
+        {
+            image: '/images/pool.png',
+            title: 'Resort',
+            description: 'Relax and unwind at our beautiful resort facilities featuring pools, gardens, and recreational amenities.',
+            buttonText: 'Learn More',
+            link: '/resort-list',
+        },
+        // {
+        //     image: '/images/download.png',
+        //     title: 'Boat Tours',
+        //     description: 'Embark on an unforgettable journey through the rapids with our expert boatmen and traditional bancas.',
+        //     buttonText: 'Book a Tour',
+        //     link: '#boat',
+        // },
+    ];
+
+    const itemsPerView = 3;
+    const totalCards = galleryCards.length;
+
+    const handlePrev = () => {
+        setCurrentIndex((prev) => (prev - 1 + totalCards) % totalCards);
+    };
+
+    const handleNext = () => {
+        setCurrentIndex((prev) => (prev + 1) % totalCards);
+    };
+
+    return (
+        <section className="bg-gray-100 py-20">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="mb-12 text-center">
+                    <h2 className="mb-4 text-4xl font-bold text-gray-900">Explore Our Offerings</h2>
+                    <p className="mx-auto max-w-3xl text-xl text-gray-600">
+                        From comfortable accommodations to thrilling adventures, discover everything we have to offer
+                    </p>
+                </div>
+
+                <div className="relative">
+                    {/* Navigation Buttons */}
+                    <button
+                        onClick={handlePrev}
+                        className="absolute top-1/2 -left-4 z-10 -translate-y-1/2 rounded-full bg-white p-3 shadow-lg transition-all hover:scale-110 hover:bg-gray-100 focus:ring-2 focus:ring-green-500 focus:outline-none"
+                        aria-label="Previous cards"
                     >
-                        {' '}
-                        <div className="text-center">
-                            <img src="/images/couple.png" alt="Boat Tour" className="mb-4 h-48 w-full rounded-lg object-cover" />
-                            <h3 className="mb-2 text-xl font-semibold">Exciting Boat Tours</h3>
-                            <p className="text-gray-600">Navigate through rapids with experienced boatmen on traditional bancas</p>
+                        <svg className="h-6 w-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <button
+                        onClick={handleNext}
+                        className="absolute top-1/2 -right-4 z-10 -translate-y-1/2 rounded-full bg-white p-3 shadow-lg transition-all hover:scale-110 hover:bg-gray-100 focus:ring-2 focus:ring-green-500 focus:outline-none"
+                        aria-label="Next cards"
+                    >
+                        <svg className="h-6 w-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+
+                    {/* Cards Container */}
+                    <div className="overflow-hidden">
+                        <div
+                            className="flex transition-transform duration-500 ease-in-out"
+                            style={{
+                                transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
+                            }}
+                        >
+                            {galleryCards.map((card, index) => (
+                                <div key={index} className="w-full flex-shrink-0 px-3 md:w-1/2 lg:w-1/3">
+                                    <AnimatedContent
+                                        distance={80}
+                                        direction="vertical"
+                                        reverse={false}
+                                        duration={0.8}
+                                        ease="power3.out"
+                                        initialOpacity={0}
+                                        animateOpacity
+                                        scale={1.03}
+                                        threshold={0.1}
+                                        delay={0.1 * (index % itemsPerView)}
+                                    >
+                                        <div className="overflow-hidden rounded-xl bg-white shadow-lg transition-all hover:shadow-2xl">
+                                            <div className="aspect-[2/3] overflow-hidden">
+                                                <img
+                                                    src={card.image}
+                                                    alt={card.title}
+                                                    className="h-full w-full object-cover transition-transform duration-500 hover:scale-110"
+                                                />
+                                            </div>
+                                            <div className="space-y-3 p-6">
+                                                <h3 className="text-xl font-bold text-gray-900">{card.title}</h3>
+                                                <p className="line-clamp-2 text-sm text-gray-600">{card.description}</p>
+                                                <a
+                                                    href={card.link}
+                                                    className="block w-full rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 px-4 py-2.5 text-center text-sm font-semibold text-white shadow-md transition-all hover:from-green-700 hover:to-emerald-700 hover:shadow-lg"
+                                                >
+                                                    {card.buttonText}
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </AnimatedContent>
+                                </div>
+                            ))}
                         </div>
-                    </AnimatedContent>
+                    </div>
+
+                    {/* Dots Indicator */}
+                    <div className="mt-8 flex justify-center gap-2">
+                        {galleryCards.map((_, index) => (
+                            <button
+                                key={index}
+                                onClick={() => setCurrentIndex(index)}
+                                className={`h-2 rounded-full transition-all ${
+                                    currentIndex === index ? 'w-8 bg-green-600' : 'w-2 bg-gray-300 hover:bg-gray-400'
+                                }`}
+                                aria-label={`Go to card ${index + 1}`}
+                            />
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+};
+
+// Policies Accordion Section Component
+const PoliciesSection = () => {
+    const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+    const policies = [
+        {
+            title: 'Reservation',
+            content:
+                'All reservations must be made in advance through our online booking system or by contacting our front desk. A valid ID and contact information are required. Payment confirmation is needed to secure your reservation. We recommend booking at least 2 weeks in advance during peak seasons.',
+        },
+        {
+            title: 'Cancellation and No Show Policy',
+            content:
+                'Cancellations made 7 days or more before arrival date will receive a full refund. Cancellations made 3-6 days before arrival will incur a 50% charge. Cancellations within 48 hours or no-shows will be charged the full amount. Refunds will be processed within 14 business days.',
+        },
+        {
+            title: 'Arrival and Departure',
+            content:
+                'Check-in time is from 2:00 PM onwards. Early check-in may be requested subject to availability. Check-out time is 12:00 PM noon. Late check-out may be arranged with prior notice and additional charges may apply. Please present a valid ID during check-in.',
+        },
+        {
+            title: 'Boat Ride',
+            content:
+                'Boat rides are operated by the United Boatmen Association of Pagsanjan (UBAP). Life jackets must be worn at all times during the ride. Follow all safety instructions from your boatman. The boat ride is weather-dependent and may be cancelled for safety reasons. Rates include boat rental and boatman fees.',
+        },
+        {
+            title: 'Food and Dining',
+            content:
+                'Restaurant operating hours: Breakfast 6:00 AM - 10:00 AM, Lunch 11:00 AM - 2:00 PM, Dinner 6:00 PM - 10:00 PM. Outside food is not allowed in the restaurant area. Special dietary requirements should be communicated in advance. Room service is available with additional charges.',
+        },
+        {
+            title: 'Pets',
+            content:
+                'Pets are allowed in designated areas only with prior approval. Pet owners must keep their pets on a leash at all times. Pet cleaning fees may apply. Owners are responsible for any damage caused by their pets. Vaccination records may be required upon check-in.',
+        },
+    ];
+
+    const toggleAccordion = (index: number) => {
+        setOpenIndex(openIndex === index ? null : index);
+    };
+
+    const handleKeyPress = (event: React.KeyboardEvent, index: number) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            toggleAccordion(index);
+        }
+    };
+
+    return (
+        <section className="bg-gradient-to-b from-white to-gray-50 px-4 py-8 md:px-6 md:py-12">
+            <div className="mx-auto max-w-5xl">
+                <div className="mb-6 text-center">
+                    <h2 className="text-2xl font-semibold text-slate-700 md:text-3xl">
+                        Landing Area / Resort / Restaurant / Hotel & Pagsanjan Policies
+                    </h2>
+                </div>
+
+                <div className="grid gap-3 md:grid-cols-2 md:gap-4">
+                    {policies.map((policy, index) => (
+                        <AnimatedContent
+                            key={index}
+                            distance={60}
+                            direction="vertical"
+                            reverse={false}
+                            duration={0.6}
+                            ease="power3.out"
+                            initialOpacity={0}
+                            animateOpacity
+                            threshold={0.1}
+                            delay={0.1 * (index % 2)}
+                        >
+                            <div
+                                className={`overflow-hidden rounded-md bg-gray-50 shadow-sm transition-all hover:bg-gray-100 hover:shadow ${
+                                    openIndex === index ? 'ring-opacity-20 bg-gray-100 ring-1 ring-[#2F5F5D]' : ''
+                                }`}
+                                role="button"
+                                tabIndex={0}
+                                onClick={() => toggleAccordion(index)}
+                                onKeyPress={(e) => handleKeyPress(e, index)}
+                                aria-expanded={openIndex === index}
+                                aria-label={`${policy.title} policy`}
+                            >
+                                <div className="flex cursor-pointer items-center justify-between px-4 py-3">
+                                    <h3 className="text-sm font-semibold text-[#2F5F5D] md:text-base">{policy.title}</h3>
+                                    <div
+                                        className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[#2F5F5D] text-white transition-transform duration-300 ${
+                                            openIndex === index ? 'rotate-45' : ''
+                                        }`}
+                                    >
+                                        <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div
+                                    className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                                        openIndex === index ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0'
+                                    }`}
+                                >
+                                    <div className="border-t border-gray-200 px-4 pt-2.5 pb-3">
+                                        <p className="text-xs leading-relaxed font-normal text-gray-700">{policy.content}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </AnimatedContent>
+                    ))}
+                </div>
+
+                <div className="mt-6 text-center">
+                    <p className="text-xs text-gray-600">
+                        For more information about our policies, please contact our front desk or visit our information center.
+                    </p>
                 </div>
             </div>
         </section>
@@ -391,7 +840,7 @@ const HotelRoomsSection = ({ hotels, role }: { hotels: any[]; role: number }) =>
     }
 
     return (
-        <section id="hotel" className="bg-[#13431a] py-20 scroll-mt-16">
+        <section id="hotel" className="scroll-mt-16 bg-[#13431a] py-20">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="mb-12 text-center">
                     <h2 className="mb-4 text-4xl font-bold text-white">Our Hotels</h2>
@@ -678,7 +1127,7 @@ const RestaurantSection = ({ restaurants, role }: { restaurants: any[]; role: nu
     }
 
     return (
-        <section id="restaurant" className="bg-gradient-to-b from-green-50 to-white py-20 scroll-mt-16">
+        <section id="restaurant" className="scroll-mt-16 bg-gradient-to-b from-green-50 to-white py-20">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="mb-12 text-center">
                     <h2 className="mb-4 text-4xl font-bold text-gray-900">Dine at Our Restaurants</h2>
@@ -855,7 +1304,7 @@ const ResortsSection = ({ resorts, role }: { resorts: any[]; role: number }) => 
     }
 
     return (
-        <section id="resort" className="bg-gradient-to-b from-emerald-50 to-white py-20 scroll-mt-16">
+        <section id="resort" className="scroll-mt-16 bg-gradient-to-b from-emerald-50 to-white py-20">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="mb-12 text-center">
                     <h2 className="mb-4 text-4xl font-bold text-gray-900">Stay at Our Resorts</h2>
@@ -933,7 +1382,8 @@ const ResortsSection = ({ resorts, role }: { resorts: any[]; role: number }) => 
                                                 <div className="p-6">
                                                     <h3 className="mb-4 text-xl font-semibold text-gray-900">{resort.resort_name}</h3>
                                                     <p className="mb-4 text-sm text-gray-600">
-                                                        Discover our beautiful resort with stunning views and excellent amenities for your perfect getaway.
+                                                        Discover our beautiful resort with stunning views and excellent amenities for your perfect
+                                                        getaway.
                                                     </p>
                                                     <Link
                                                         href={role === 3 ? route('customer.resort.show', { id: resort.id }) : '/login'}
@@ -1029,92 +1479,239 @@ const AccommodationSection = () => {
     );
 };
 
-// Contact Section Component
+// Contact & Footer Section Component
 const ContactSection = () => {
+    const [email, setEmail] = useState('');
+
+    const handleSubscribe = (e: React.FormEvent) => {
+        e.preventDefault();
+        // Handle subscription logic here
+        console.log('Subscribing email:', email);
+        setEmail('');
+    };
+
     return (
-        <section className="bg-gray-900 py-20 text-white">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="grid gap-12 lg:grid-cols-3">
-                    <div>
-                        <h3 className="mb-6 text-2xl font-semibold">Visit Us Today</h3>
-                        <div className="space-y-4">
-                            <div>
-                                <h4 className="font-semibold text-green-400">Address</h4>
-                                <p className="text-gray-300">
-                                    Pagsanjan Falls Resort
-                                    <br />
-                                    Barangay Pinagsanjan, Laguna
-                                    <br />
-                                    Philippines
+        <>
+            {/* Contact Information Section */}
+            <section className="bg-[#093517] py-16 text-white">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div className="mb-12 text-center">
+                        <h2 className="text-4xl font-bold md:text-5xl">Get In Touch With Us</h2>
+                    </div>
+
+                    <div className="grid gap-8 md:grid-cols-3">
+                        {/* Column 1 - Tourist Advisory */}
+                        <div className="border-r-0 pr-0 md:border-r md:border-white/20 md:pr-8">
+                            <h3 className="mb-4 text-xl font-bold">Tourist Advisory</h3>
+                            <p className="mb-4 text-sm leading-relaxed font-semibold text-yellow-300">
+                                DON'T STOP & DEAL WITH ILLEGAL BOATMEN FLAGGERS RUNNING ALONG THE ROAD!
+                            </p>
+                            <div className="space-y-3 text-sm">
+                                <p className="leading-relaxed">If you experience harassment or overpricing, please contact:</p>
+                                <div>
+                                    <p className="font-semibold">Tourist Police Force:</p>
+                                    <a href="tel:+639178095213" className="text-white/90 hover:text-white hover:underline">
+                                        +63 917 809 5213
+                                    </a>
+                                </div>
+                                <div>
+                                    <p className="font-semibold">Municipal Tourism Office:</p>
+                                    <a href="tel:+639176238764" className="text-white/90 hover:text-white hover:underline">
+                                        +63 917 623 8764
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Column 2 - Hotline Numbers */}
+                        <div className="border-r-0 pr-0 md:border-r md:border-white/20 md:pr-8">
+                            <h3 className="mb-4 text-xl font-bold">HOTLINE NUMBERS</h3>
+                            <div className="space-y-2 text-sm">
+                                <div>
+                                    <p className="font-semibold">Office of the Mayor</p>
+                                    <a href="tel:+63495014355" className="text-white/90 hover:text-white hover:underline">
+                                        (049) 501-4355
+                                    </a>
+                                    {' / '}
+                                    <a href="tel:+63495014356" className="text-white/90 hover:text-white hover:underline">
+                                        (049) 501-4356
+                                    </a>
+                                </div>
+                                <div>
+                                    <p className="font-semibold">Tourism, Culture & Arts Office</p>
+                                    <a href="tel:+639176238764" className="text-white/90 hover:text-white hover:underline">
+                                        +63 917 623 8764
+                                    </a>
+                                </div>
+                                <div>
+                                    <p className="font-semibold">Pagsanjan Police Station</p>
+                                    <a href="tel:+639178095213" className="text-white/90 hover:text-white hover:underline">
+                                        +63 917 809 5213
+                                    </a>
+                                </div>
+                                <div>
+                                    <p className="font-semibold">Pagsanjan Fire Station</p>
+                                    <a href="tel:+639989997845" className="text-white/90 hover:text-white hover:underline">
+                                        +63 998 999 7845
+                                    </a>
+                                </div>
+                                <div>
+                                    <p className="font-semibold">Pagsanjan Health Center</p>
+                                    <a href="tel:+639178841234" className="text-white/90 hover:text-white hover:underline">
+                                        +63 917 884 1234
+                                    </a>
+                                </div>
+                                <div>
+                                    <p className="font-semibold">Pagsanjan Medical Clinic</p>
+                                    <a href="tel:+639175551234" className="text-white/90 hover:text-white hover:underline">
+                                        +63 917 555 1234
+                                    </a>
+                                </div>
+                                <div>
+                                    <p className="font-semibold">Christian General Hospital</p>
+                                    <a href="tel:+63495014789" className="text-white/90 hover:text-white hover:underline">
+                                        (049) 501-4789
+                                    </a>
+                                </div>
+                                <div>
+                                    <p className="font-semibold">Laguna AAAWATER Corp</p>
+                                    <a href="tel:+63495014200" className="text-white/90 hover:text-white hover:underline">
+                                        (049) 501-4200
+                                    </a>
+                                </div>
+                                <div>
+                                    <p className="font-semibold">First Laguna Electric Coop</p>
+                                    <a href="tel:+63495014300" className="text-white/90 hover:text-white hover:underline">
+                                        (049) 501-4300
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Column 3 - GSIS Pagsanjan */}
+                        <div>
+                            <h3 className="mb-4 text-xl font-bold">GSIS-PAGSANJAN</h3>
+                            <div className="space-y-2 text-sm">
+                                <div>
+                                    <a href="tel:+63495014400" className="text-white/90 hover:text-white hover:underline">
+                                        (049) 501-4400
+                                    </a>
+                                </div>
+                                <div className="mt-4">
+                                    <p className="font-semibold">Diocesan Shrine of Our Lady of Guadalupe</p>
+                                    <a href="tel:+63495014500" className="text-white/90 hover:text-white hover:underline">
+                                        (049) 501-4500
+                                    </a>
+                                </div>
+                                <div>
+                                    <p className="font-semibold">Pagsanjan Rescue Team</p>
+                                    <a href="tel:+639178095555" className="text-white/90 hover:text-white hover:underline">
+                                        +63 917 809 5555
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Footer Section */}
+            <footer className="bg-[#5a5a5a] py-12 text-white">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div className="grid gap-8 md:grid-cols-3">
+                        {/* Column 1 - Logo & Location */}
+                        <div className="text-center md:text-left">
+                            <div className="mb-4 flex justify-center md:justify-start">
+                                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10">
+                                    <img src="/images/logo.png" alt="Pagsanjan Falls" className="h-12 w-12" />
+                                </div>
+                            </div>
+                            <p className="text-sm text-white/90">
+                                Municipality of Pagsanjan,
+                                <br />
+                                Laguna, Philippines
+                            </p>
+                        </div>
+
+                        {/* Column 2 - Navigation Links */}
+                        <div className="text-start">
+                            <nav className="space-y-2">
+                                <a
+                                    href="#about"
+                                    className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]"
+                                >
+                                    ABOUT US
+                                </a>
+                                <a
+                                    href="#activities"
+                                    className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]"
+                                >
+                                    ACTIVITIES
+                                </a>
+                                <a
+                                    href="#contact"
+                                    className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]"
+                                >
+                                    CONTACT US
+                                </a>
+                                <a
+                                    href="#faqs"
+                                    className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]"
+                                >
+                                    FAQS
+                                </a>
+                                <a
+                                    href="/data-privacy"
+                                    className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]"
+                                >
+                                    PRIVACY POLICY
+                                </a>
+                                <a
+                                    href="/terms-conditions"
+                                    className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]"
+                                >
+                                    TERMS AND CONDITIONS
+                                </a>
+                            </nav>
+                        </div>
+
+                        {/* Column 3 - Newsletter Signup */}
+                        <div>
+                            <h3 className="mb-3 text-sm font-semibold">Be the first to discover exclusive deals. Subscribe now!</h3>
+                            <form onSubmit={handleSubscribe} className="space-y-3">
+                                <div className="flex flex-col gap-2 sm:flex-row">
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        placeholder="Enter your email"
+                                        required
+                                        className="flex-1 border-0 bg-white px-4 py-2 text-sm text-gray-900 placeholder:text-gray-500 focus:ring-2 focus:ring-[#2d5f5d] focus:outline-none"
+                                    />
+                                    <button
+                                        type="submit"
+                                        className="rounded-md bg-[#2d5f5d] px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#3d6b68]"
+                                    >
+                                        Subscribe
+                                    </button>
+                                </div>
+                                <p className="text-xs text-white/70">
+                                    By subscribing to our mailing list, you agree with our{' '}
+                                    <a href="/data-privacy" className="underline hover:text-white">
+                                        Privacy Policy
+                                    </a>
                                 </p>
-                            </div>
-                            <div>
-                                <h4 className="font-semibold text-green-400">Phone</h4>
-                                <p className="text-gray-300">+63 XXX XXX XXXX</p>
-                            </div>
-                            <div>
-                                <h4 className="font-semibold text-green-400">Email</h4>
-                                <p className="text-gray-300">info@pagsanjanfallsresort.com</p>
-                            </div>
+                            </form>
                         </div>
                     </div>
 
-                    <div>
-                        <h3 className="mb-6 text-2xl font-semibold">Quick Links</h3>
-                        <ul className="space-y-2">
-                            <li>
-                                <a href="#" className="text-gray-300 transition-colors hover:text-green-400">
-                                    Home
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#" className="text-gray-300 transition-colors hover:text-green-400">
-                                    Accommodations
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#" className="text-gray-300 transition-colors hover:text-green-400">
-                                    Boat Tours
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#" className="text-gray-300 transition-colors hover:text-green-400">
-                                    Gallery
-                                </a>
-                            </li>
-                            <li>
-                                <a href="/data-privacy" className="text-gray-300 transition-colors hover:text-green-400">
-                                    Data Privacy
-                                </a>
-                            </li>
-                            <li>
-                                <a href="/terms-conditions" className="text-gray-300 transition-colors hover:text-green-400">
-                                    Terms & Conditions
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#" className="text-gray-300 transition-colors hover:text-green-400">
-                                    Contact
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div>
-                        <h3 className="mb-6 text-2xl font-semibold">Newsletter</h3>
-                        <p className="mb-4 text-gray-300">Subscribe for updates on special offers and events</p>
-                        <div className="flex">
-                            <input type="email" placeholder="Your email" className="flex-1 rounded-l-md px-4 py-2 text-gray-900" />
-                            <button className="rounded-r-md bg-green-600 px-6 py-2 transition-colors hover:bg-green-700">Subscribe</button>
-                        </div>
+                    {/* Bottom Bar */}
+                    <div className="mt-12 border-t border-white/20 pt-8 text-center">
+                        <p className="text-sm text-white/70">COPYRIGHT PAGSANJAN FALLS 2025</p>
                     </div>
                 </div>
-
-                <div className="mt-12 border-t border-gray-700 pt-8 text-center">
-                    <p className="text-gray-400">&copy; 2025 Pagsanjan Falls Resort. All rights reserved.</p>
-                </div>
-            </div>
-        </section>
+            </footer>
+        </>
     );
 };
 
@@ -1137,7 +1734,7 @@ const LandingAreasSection = ({ landingAreas, role }: { landingAreas: any[]; role
     }
 
     return (
-        <section id="landing-area" className="bg-gradient-to-b from-blue-50 to-white py-20 scroll-mt-16">
+        <section id="landing-area" className="scroll-mt-16 bg-gradient-to-b from-blue-50 to-white py-20">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="mb-12 text-center">
                     <h2 className="mb-4 text-4xl font-bold text-gray-900">Boat Rides to Landing Areas</h2>
@@ -1308,13 +1905,17 @@ const MainComponent = ({
             {/* Main content that will scroll over the fixed hero */}
             <div className="mt-screen relative z-10" style={{ marginTop: '100vh' }}>
                 <AboutSection />
-                <HotelRoomsSection hotels={hotels} role={role} />
+                <ExperienceSection />
+                <MiniFeatureSection />
+                <GalleryCardsSection />
+                <PoliciesSection />
+                {/* <LandingAreasSection landingAreas={landingAreas} role={role} /> */}
+                {/* <HotelRoomsSection hotels={hotels} role={role} />
                 <BoatToursSection role={role} />
                 <RestaurantSection restaurants={restaurants} role={role} />
-                <LandingAreasSection landingAreas={landingAreas} role={role} />
-                <ResortsSection resorts={resorts} role={role} />
-                <AccommodationSection />
-                <CallToActionSection />
+                <ResortsSection resorts={resorts} role={role} /> */}
+                {/* <AccommodationSection />
+                <CallToActionSection /> */}
                 <ContactSection />
             </div>
         </div>

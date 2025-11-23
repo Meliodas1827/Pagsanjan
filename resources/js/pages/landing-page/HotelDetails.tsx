@@ -124,7 +124,7 @@ export default function HotelDetails() {
 
                         {/* Hotel Image Gallery */}
                         <div className="mt-8">
-                            <ImageGallery images={hotel.hotel_images} mainImage={hotel.image_url} />
+                            <ImageGallery images={hotel.hotel_images || []} mainImage={hotel.image_url} />
                         </div>
                     </div>
                 </div>
