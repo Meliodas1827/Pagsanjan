@@ -28,6 +28,8 @@ interface LandingArea {
     image: string | null;
     payment_qr: string | null;
     price: number | string | null;
+    price_per_adult?: number | string | null;
+    price_per_child?: number | string | null;
     images: LandingAreaImage[];
 }
 
@@ -200,6 +202,28 @@ export default function LandingAreaBooking() {
 
     const totalGuests = form.data.number_of_adults + form.data.number_of_children;
     const qrCodeUrl = landingArea.payment_qr ? `/storage/${landingArea.payment_qr}` : null;
+
+    // Calculate total price based on adults and children
+    const calculateTotalPrice = () => {
+        const adults = form.data.number_of_adults || 0;
+        const children = form.data.number_of_children || 0;
+
+        // Use new pricing if available
+        if (landingArea.price_per_adult || landingArea.price_per_child) {
+            const adultPrice = parseFloat(landingArea.price_per_adult as string) || 0;
+            const childPrice = parseFloat(landingArea.price_per_child as string) || 0;
+            return (adults * adultPrice) + (children * childPrice);
+        }
+
+        // Fallback to legacy price (if available)
+        if (landingArea.price) {
+            return parseFloat(landingArea.price as string) || 0;
+        }
+
+        return 0;
+    };
+
+    const totalPrice = calculateTotalPrice();
 
     return (
         <>
@@ -388,11 +412,43 @@ export default function LandingAreaBooking() {
                                         </div>
 
                                         {/* Price Display */}
-                                        {landingArea.price && (
+                                        {(landingArea.price_per_adult || landingArea.price_per_child || landingArea.price) && (
                                             <div className="rounded-lg bg-emerald-50 p-4">
-                                                <div className="flex items-center justify-between">
-                                                    <span className="text-lg font-semibold text-gray-900">Price:</span>
-                                                    <span className="text-2xl font-bold text-emerald-600">₱{landingArea.price}</span>
+                                                <div className="space-y-3">
+                                                    {landingArea.price_per_adult && (
+                                                        <div className="flex items-center justify-between text-sm">
+                                                            <span className="text-gray-700">
+                                                                {form.data.number_of_adults} Adult{form.data.number_of_adults > 1 ? 's' : ''} × ₱
+                                                                {landingArea.price_per_adult}
+                                                            </span>
+                                                            <span className="font-semibold text-gray-900">
+                                                                ₱{(form.data.number_of_adults * parseFloat(landingArea.price_per_adult as string)).toFixed(2)}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                    {landingArea.price_per_child && form.data.number_of_children > 0 && (
+                                                        <div className="flex items-center justify-between text-sm">
+                                                            <span className="text-gray-700">
+                                                                {form.data.number_of_children} Child{form.data.number_of_children > 1 ? 'ren' : ''} × ₱
+                                                                {landingArea.price_per_child}
+                                                            </span>
+                                                            <span className="font-semibold text-gray-900">
+                                                                ₱{(form.data.number_of_children * parseFloat(landingArea.price_per_child as string)).toFixed(2)}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                    {!landingArea.price_per_adult && !landingArea.price_per_child && landingArea.price && (
+                                                        <div className="flex items-center justify-between text-sm">
+                                                            <span className="text-gray-700">Base Price:</span>
+                                                            <span className="font-semibold text-gray-900">₱{landingArea.price}</span>
+                                                        </div>
+                                                    )}
+                                                    <div className="border-t border-emerald-200 pt-2">
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="text-lg font-semibold text-gray-900">Total Price:</span>
+                                                            <span className="text-2xl font-bold text-emerald-600">₱{totalPrice.toFixed(2)}</span>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         )}
@@ -404,7 +460,7 @@ export default function LandingAreaBooking() {
                                     <Card>
                                         <CardHeader>
                                             <CardTitle>Payment QR Code</CardTitle>
-                                            <CardDescription>Scan to pay ₱{landingArea.price || '0.00'}</CardDescription>
+                                            <CardDescription>Scan to pay ₱{totalPrice.toFixed(2)}</CardDescription>
                                         </CardHeader>
                                         <CardContent>
                                             <div className="flex justify-center rounded-lg bg-white p-6">
@@ -493,11 +549,11 @@ export default function LandingAreaBooking() {
                                                 )}
                                             </div>
                                         </div>
-                                        {landingArea.price && (
+                                        {(landingArea.price_per_adult || landingArea.price_per_child || landingArea.price) && (
                                             <div className="border-t pt-4">
                                                 <div className="flex items-center justify-between">
                                                     <span className="text-lg font-semibold text-gray-900">Total</span>
-                                                    <span className="text-2xl font-bold text-emerald-600">₱{landingArea.price}</span>
+                                                    <span className="text-2xl font-bold text-emerald-600">₱{totalPrice.toFixed(2)}</span>
                                                 </div>
                                             </div>
                                         )}

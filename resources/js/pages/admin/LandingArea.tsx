@@ -33,6 +33,8 @@ interface LandingArea {
     capacity: number | null;
     image: string | null;
     price: number | null;
+    price_per_adult: number | null;
+    price_per_child: number | null;
 }
 
 interface PageProps {
@@ -55,6 +57,8 @@ export default function LandingArea() {
         is_active: true,
         capacity: '',
         price: '',
+        price_per_adult: '',
+        price_per_child: '',
         image: null as File | null,
     });
 
@@ -66,6 +70,8 @@ export default function LandingArea() {
         is_active: true,
         capacity: '',
         price: '',
+        price_per_adult: '',
+        price_per_child: '',
         image: null as File | null,
     });
 
@@ -137,6 +143,8 @@ export default function LandingArea() {
             is_active: area.is_active,
             capacity: area.capacity?.toString() || '',
             price: area.price?.toString() || '',
+            price_per_adult: area.price_per_adult?.toString() || '',
+            price_per_child: area.price_per_child?.toString() || '',
             image: null,
         });
         setEditDialogOpen(true);
@@ -161,7 +169,7 @@ export default function LandingArea() {
                             <TableHead>Name</TableHead>
                             <TableHead>Location</TableHead>
                             <TableHead>Capacity</TableHead>
-                            <TableHead>Price</TableHead>
+                            <TableHead>Ride Prices</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead>Actions</TableHead>
                         </TableRow>
@@ -203,7 +211,14 @@ export default function LandingArea() {
                                     </div>
                                 </TableCell>
                                 <TableCell>{area.capacity || 'N/A'}</TableCell>
-                                <TableCell>{area.price ? `₱${area.price}` : 'N/A'}</TableCell>
+                                <TableCell>
+                                    <div className="text-sm">
+                                        {area.price_per_adult && <div>Adult: ₱{area.price_per_adult}</div>}
+                                        {area.price_per_child && <div>Child: ₱{area.price_per_child}</div>}
+                                        {!area.price_per_adult && !area.price_per_child && area.price && <div>Legacy: ₱{area.price}</div>}
+                                        {!area.price_per_adult && !area.price_per_child && !area.price && 'N/A'}
+                                    </div>
+                                </TableCell>
                                 <TableCell>
                                     <Badge variant={area.is_active ? 'default' : 'secondary'}>
                                         {area.is_active ? 'Active' : 'Inactive'}
@@ -306,7 +321,7 @@ export default function LandingArea() {
                             />
                         </div>
                         <div>
-                            <Label htmlFor="add-price">Additional Price</Label>
+                            <Label htmlFor="add-price">Additional Price (Legacy)</Label>
                             <Input
                                 id="add-price"
                                 type="number"
@@ -315,6 +330,30 @@ export default function LandingArea() {
                                 value={addForm.data.price}
                                 onChange={(e) => addForm.setData('price', e.target.value)}
                                 placeholder="e.g., 100.00"
+                            />
+                        </div>
+                        <div>
+                            <Label htmlFor="add-price-adult">Price per Adult</Label>
+                            <Input
+                                id="add-price-adult"
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={addForm.data.price_per_adult}
+                                onChange={(e) => addForm.setData('price_per_adult', e.target.value)}
+                                placeholder="e.g., 200.00"
+                            />
+                        </div>
+                        <div>
+                            <Label htmlFor="add-price-child">Price per Child</Label>
+                            <Input
+                                id="add-price-child"
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={addForm.data.price_per_child}
+                                onChange={(e) => addForm.setData('price_per_child', e.target.value)}
+                                placeholder="e.g., 150.00"
                             />
                         </div>
                         <div>
@@ -407,7 +446,7 @@ export default function LandingArea() {
                             />
                         </div>
                         <div>
-                            <Label htmlFor="edit-price">Additional Price</Label>
+                            <Label htmlFor="edit-price">Additional Price (Legacy)</Label>
                             <Input
                                 id="edit-price"
                                 type="number"
@@ -415,6 +454,30 @@ export default function LandingArea() {
                                 step="0.01"
                                 value={editForm.data.price}
                                 onChange={(e) => editForm.setData('price', e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <Label htmlFor="edit-price-adult">Price per Adult</Label>
+                            <Input
+                                id="edit-price-adult"
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={editForm.data.price_per_adult}
+                                onChange={(e) => editForm.setData('price_per_adult', e.target.value)}
+                                placeholder="e.g., 200.00"
+                            />
+                        </div>
+                        <div>
+                            <Label htmlFor="edit-price-child">Price per Child</Label>
+                            <Input
+                                id="edit-price-child"
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={editForm.data.price_per_child}
+                                onChange={(e) => editForm.setData('price_per_child', e.target.value)}
+                                placeholder="e.g., 150.00"
                             />
                         </div>
                         <div>

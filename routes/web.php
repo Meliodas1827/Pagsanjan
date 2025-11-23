@@ -61,12 +61,17 @@ use App\Http\Controllers\LandingAreaAdmin\DashboardController as LandingAreaDash
 use App\Http\Controllers\LandingAreaAdmin\CustomerRequestController;
 use App\Http\Controllers\LandingAreaAdmin\PaymentQRController;
 use App\Http\Controllers\LandingAreaAdmin\LandingAreaImageController;
+use App\Http\Controllers\LandingAreaAdmin\PriceManagementController;
+use App\Http\Controllers\SubscriberController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 
 
 Route::group([], function () {
+    // Newsletter subscription route (public)
+    Route::post('/subscribe', [SubscriberController::class, 'subscribe'])->name('subscribe');
+
     Route::get('/', function () {
         $hotels = \App\Models\Hotel::where('isdeleted', 0)
             ->limit(6)
@@ -131,6 +136,8 @@ Route::group([], function () {
                     'image' => $landingArea->image,
                     'payment_qr' => $landingArea->payment_qr,
                     'price' => $landingArea->price,
+                    'price_per_adult' => $landingArea->price_per_adult,
+                    'price_per_child' => $landingArea->price_per_child,
                 ];
             });
 
@@ -354,6 +361,10 @@ Route::middleware(['auth', 'verified', 'role:landing_area'])->group(function () 
     Route::put('landing-area-images/{image}', [LandingAreaImageController::class, 'update'])->name('landing-area.images.update');
     Route::delete('landing-area-images/{image}', [LandingAreaImageController::class, 'destroy'])->name('landing-area.images.destroy');
     Route::post('landing-area-images/reorder', [LandingAreaImageController::class, 'reorder'])->name('landing-area.images.reorder');
+
+    // Price Management
+    Route::get('landing-area-price-management', [PriceManagementController::class, 'index'])->name('landing-area.price-management');
+    Route::post('landing-area-price-management', [PriceManagementController::class, 'update'])->name('landing-area.price-management.update');
 });
 
 // restaurant portal

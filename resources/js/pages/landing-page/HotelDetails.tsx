@@ -3,6 +3,7 @@ import { ArrowLeft, MapPin, Bed, Users, DollarSign, LogOut, NotebookTabs, User, 
 import { type SharedData } from '@/types';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import ImageGallery from './components/ImageGallery';
+import { useState } from 'react';
 
 interface HotelImage {
     id: number;
@@ -89,6 +90,147 @@ const PublicNavBar = ({ role }: { role: number }) => {
     );
 };
 
+const ContactSection = () => {
+    const [email, setEmail] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+    const handleSubscribe = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setMessage(null);
+
+        try {
+            const response = await fetch('/subscribe', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+                body: JSON.stringify({ email }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                setMessage({ type: 'success', text: data.message });
+                setEmail('');
+            } else {
+                setMessage({ type: 'error', text: data.message });
+            }
+        } catch (error) {
+            setMessage({ type: 'error', text: 'An error occurred. Please try again later.' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <footer className="bg-[#5a5a5a] py-12 text-white">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="grid gap-8 md:grid-cols-3">
+                    {/* Column 1 - Logo & Location */}
+                    <div className="text-center md:text-left">
+                        <div className="mb-4 flex justify-center md:justify-start">
+                            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10">
+                                <img src="/images/logo.png" alt="Pagsanjan Falls" className="h-12 w-12" />
+                            </div>
+                        </div>
+                        <p className="text-sm text-white/90">
+                            Municipality of Pagsanjan,
+                            <br />
+                            Laguna, Philippines
+                        </p>
+                    </div>
+
+                    {/* Column 2 - Navigation Links */}
+                    <div className="text-start">
+                        <nav className="space-y-2">
+                            <a
+                                href="#about"
+                                className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]"
+                            >
+                                ABOUT US
+                            </a>
+                            <a
+                                href="#activities"
+                                className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]"
+                            >
+                                ACTIVITIES
+                            </a>
+                            <a
+                                href="#contact"
+                                className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]"
+                            >
+                                CONTACT US
+                            </a>
+                            <a
+                                href="#faqs"
+                                className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]"
+                            >
+                                FAQS
+                            </a>
+                            <a
+                                href="/data-privacy"
+                                className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]"
+                            >
+                                PRIVACY POLICY
+                            </a>
+                            <a
+                                href="/terms-conditions"
+                                className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]"
+                            >
+                                TERMS AND CONDITIONS
+                            </a>
+                        </nav>
+                    </div>
+
+                    {/* Column 3 - Newsletter Signup */}
+                    <div>
+                        <h3 className="mb-3 text-sm font-semibold">Be the first to discover exclusive deals. Subscribe now!</h3>
+                        <form onSubmit={handleSubscribe} className="space-y-3">
+                            <div className="flex flex-col gap-2 sm:flex-row">
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="Enter your email"
+                                    required
+                                    disabled={loading}
+                                    className="flex-1 border-0 bg-white px-4 py-2 text-sm text-gray-900 placeholder:text-gray-500 focus:ring-2 focus:ring-[#2d5f5d] focus:outline-none disabled:opacity-50"
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="rounded-md bg-[#2d5f5d] px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#3d6b68] disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {loading ? 'Subscribing...' : 'Subscribe'}
+                                </button>
+                            </div>
+                            {message && (
+                                <p className={`text-sm ${message.type === 'success' ? 'text-green-300' : 'text-red-300'}`}>
+                                    {message.text}
+                                </p>
+                            )}
+                            <p className="text-xs text-white/70">
+                                By subscribing to our mailing list, you agree with our{' '}
+                                <a href="/data-privacy" className="underline hover:text-white">
+                                    Privacy Policy
+                                </a>
+                            </p>
+                        </form>
+                    </div>
+                </div>
+
+                {/* Bottom Bar */}
+                <div className="mt-12 border-t border-white/20 pt-8 text-center">
+                    <p className="text-sm text-white/70">COPYRIGHT PAGSANJAN FALLS 2025</p>
+                </div>
+            </div>
+        </footer>
+    );
+};
+
 export default function HotelDetails() {
     const { auth } = usePage<SharedData>().props;
     const { hotel, rooms } = usePage<PageProps>().props;
@@ -131,78 +273,107 @@ export default function HotelDetails() {
 
                 {/* Rooms List */}
                 <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-                    <h2 className="mb-8 text-3xl font-light text-gray-900">Available Rooms</h2>
+                    <h2 className="mb-12 text-3xl font-light text-gray-900">Available Rooms</h2>
 
                     {rooms.length === 0 ? (
                         <div className="rounded-lg bg-white p-12 text-center shadow">
                             <p className="text-lg text-gray-500">No rooms available at this hotel.</p>
                         </div>
                     ) : (
-                        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                            {rooms.map((room) => (
-                                <div key={room.id} className="relative">
-                                    {/* Image Card - Base Layer */}
-                                    <div className="relative h-72 overflow-hidden rounded-lg shadow-lg">
-                                        {room.image_url ? (
-                                            <img
-                                                src={room.image_url}
-                                                alt={room.room_name}
-                                                className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
-                                            />
-                                        ) : (
-                                            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-300 to-gray-400">
-                                                <div className="text-center">
-                                                    <Bed className="mx-auto h-16 w-16 text-gray-500" />
-                                                    <p className="mt-2 text-sm text-gray-600">No Image</p>
+                        <div className="rounded-xl bg-white p-8 shadow-xl md:p-12">
+                            <div className="space-y-12">
+                                {rooms.map((room, index) => (
+                                    <div key={room.id}>
+                                        {/* Room Section */}
+                                        <div
+                                            className={`${
+                                                !room.is_bookable ? 'opacity-60' : ''
+                                            }`}
+                                        >
+                                            <div className="grid gap-8 md:grid-cols-2 items-center">
+                                            {/* Room Image - Left on odd, Right on even */}
+                                            <div
+                                                className={`relative overflow-hidden rounded-lg ${
+                                                    index % 2 === 0 ? 'md:order-2' : 'md:order-1'
+                                                }`}
+                                            >
+                                        <div className="aspect-[4/3] w-full">
+                                            {room.image_url ? (
+                                                <img
+                                                    src={room.image_url}
+                                                    alt={room.room_name}
+                                                    className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+                                                />
+                                            ) : (
+                                                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-300 to-gray-400">
+                                                    <div className="text-center">
+                                                        <Bed className="mx-auto h-16 w-16 text-gray-500" />
+                                                        <p className="mt-2 text-sm text-gray-600">No Image</p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        )}
-                                        {!room.is_bookable && (
-                                            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                                                <span className="rounded bg-red-600 px-4 py-2 text-sm font-semibold text-white">
-                                                    Not Available
-                                                </span>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Details Card - Overlapping Layer */}
-                                    <div className="relative -mt-16 mx-4 rounded-lg bg-white p-6 shadow-xl">
-                                        <h3 className="text-xl font-semibold text-gray-900">{room.room_name}</h3>
-                                        <p className="mt-1 text-sm text-gray-500">{room.room_type}</p>
-
-                                        {room.description && (
-                                            <p className="mt-3 line-clamp-2 text-sm text-gray-600">{room.description}</p>
-                                        )}
-
-                                        <div className="mt-4 space-y-2">
-                                            <div className="flex items-center text-sm text-gray-600">
-                                                <Users className="mr-2 h-4 w-4" />
-                                                <span>Capacity: {room.capacity} guests</span>
-                                            </div>
-                                            <div className="flex items-center text-sm text-gray-600">
-                                                <Bed className="mr-2 h-4 w-4" />
-                                                <span>{room.room_type}</span>
-                                            </div>
-                                            {room.amenities && (
-                                                <div className="text-sm text-gray-600">
-                                                    <span className="font-medium">Amenities:</span> {room.amenities}
+                                            )}
+                                            {!room.is_bookable && (
+                                                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                                                    <span className="rounded bg-red-600 px-4 py-2 text-sm font-semibold text-white">
+                                                        Not Available
+                                                    </span>
                                                 </div>
                                             )}
                                         </div>
+                                    </div>
 
-                                        <div className="mt-4 flex items-center justify-between border-t pt-4">
-                                            <div className="flex items-center">
-                                                <DollarSign className="h-5 w-5 text-green-600" />
-                                                <span className="text-2xl font-bold text-gray-900">
-                                                    {room.price_per_night}
-                                                </span>
-                                                <span className="ml-1 text-sm text-gray-500">/ night</span>
+                                    {/* Room Details - Right on odd, Left on even */}
+                                    <div
+                                        className={`space-y-6 ${
+                                            index % 2 === 0 ? 'md:order-1' : 'md:order-2'
+                                        }`}
+                                    >
+                                        <div>
+                                            <h3 className="text-3xl font-semibold text-gray-900">{room.room_name}</h3>
+                                            <p className="mt-2 text-lg text-gray-500">{room.room_type}</p>
+                                        </div>
+
+                                        {room.description && (
+                                            <p className="text-gray-600 leading-relaxed">{room.description}</p>
+                                        )}
+
+                                        {/* Room Info */}
+                                        <div className="space-y-3">
+                                            <div className="flex items-center text-gray-700">
+                                                <Users className="mr-3 h-5 w-5 text-[#18371e]" />
+                                                <span className="font-medium">Capacity:</span>
+                                                <span className="ml-2">{room.capacity} guests</span>
+                                            </div>
+                                            <div className="flex items-center text-gray-700">
+                                                <Bed className="mr-3 h-5 w-5 text-[#18371e]" />
+                                                <span className="font-medium">Room Type:</span>
+                                                <span className="ml-2">{room.room_type}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Amenities */}
+                                        {room.amenities && (
+                                            <div className="rounded-lg bg-gray-50 p-4">
+                                                <h4 className="mb-2 font-semibold text-gray-900">Amenities</h4>
+                                                <p className="text-sm text-gray-600">{room.amenities}</p>
+                                            </div>
+                                        )}
+
+                                        {/* Price and Booking */}
+                                        <div className="flex items-center justify-between border-t pt-6">
+                                            <div>
+                                                <p className="text-sm text-gray-500">Starting from</p>
+                                                <div className="flex items-baseline">
+                                                    <span className="text-4xl font-bold text-[#18371e]">
+                                                        ₱{room.price_per_night}
+                                                    </span>
+                                                    <span className="ml-2 text-lg text-gray-500">/ night</span>
+                                                </div>
                                             </div>
                                             {room.is_bookable && (
                                                 <Link
                                                     href={route('room.booking', room.id)}
-                                                    className="rounded-md bg-[#18371e] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#2a5230]"
+                                                    className="rounded-lg bg-[#18371e] px-8 py-3 text-base font-semibold text-white shadow-md transition-all hover:bg-[#2a5230] hover:shadow-lg"
                                                 >
                                                     Book Now
                                                 </Link>
@@ -210,11 +381,23 @@ export default function HotelDetails() {
                                         </div>
                                     </div>
                                 </div>
-                            ))}
+                            </div>
+
+                        {/* Separator Line - except after last item */}
+                        {index < rooms.length - 1 && (
+                            <div className="my-12">
+                                <div className="mx-auto h-px w-3/4 bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+                            </div>
+                        )}
+                    </div>
+                ))}
+                            </div>
                         </div>
                     )}
                 </div>
             </div>
+
+            <ContactSection />
         </>
     );
 }

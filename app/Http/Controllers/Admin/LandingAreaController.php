@@ -23,6 +23,8 @@ class LandingAreaController extends Controller
                 'capacity' => $area->capacity,
                 'image' => $area->image,
                 'price' => $area->price,
+                'price_per_adult' => $area->price_per_adult,
+                'price_per_child' => $area->price_per_child,
             ];
         });
 
@@ -41,6 +43,8 @@ class LandingAreaController extends Controller
             'is_active' => 'boolean',
             'capacity' => 'nullable|integer|min:1',
             'price' => 'nullable|numeric|min:0',
+            'price_per_adult' => 'nullable|numeric|min:0',
+            'price_per_child' => 'nullable|numeric|min:0',
             'image' => 'nullable|image|max:4096',
         ]);
 
@@ -63,6 +67,8 @@ class LandingAreaController extends Controller
             'is_active' => 'boolean',
             'capacity' => 'nullable|integer|min:1',
             'price' => 'nullable|numeric|min:0',
+            'price_per_adult' => 'nullable|numeric|min:0',
+            'price_per_child' => 'nullable|numeric|min:0',
             'image' => 'nullable|image|max:4096',
         ]);
 

@@ -19,11 +19,15 @@ class LandingArea extends Model
         'image',
         'payment_qr',
         'price',
+        'price_per_adult',
+        'price_per_child',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'price' => 'decimal:2',
+        'price_per_adult' => 'decimal:2',
+        'price_per_child' => 'decimal:2',
     ];
 
     public function boatBookings()

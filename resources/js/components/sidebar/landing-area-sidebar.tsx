@@ -1,5 +1,5 @@
 import { NavItem } from '@/types';
-import { ImageIcon, LayoutGrid, MessageSquare, QrCode } from 'lucide-react';
+import { DollarSign, ImageIcon, LayoutGrid, MessageSquare, QrCode } from 'lucide-react';
 import { NavMain } from '../nav-main';
 import { SidebarContent } from '../ui/sidebar';
 
@@ -13,6 +13,11 @@ const mainNavItems: NavItem[] = [
         title: 'Customer Requests',
         href: '/landing-area-requests',
         icon: MessageSquare,
+    },
+    {
+        title: 'Price Management',
+        href: '/landing-area-price-management',
+        icon: DollarSign,
     },
     {
         title: 'Landing Area Images',

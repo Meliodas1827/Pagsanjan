@@ -18,6 +18,8 @@ interface LandingArea {
     image: string | null;
     payment_qr: string | null;
     price: number | string;
+    price_per_adult?: number | string | null;
+    price_per_child?: number | string | null;
 }
 
 interface Hotel {
@@ -93,12 +95,37 @@ const defaultAccommodation = {
 
 const ContactSection = () => {
     const [email, setEmail] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-    const handleSubscribe = (e: React.FormEvent) => {
+    const handleSubscribe = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Handle subscription logic here
-        console.log('Subscribing email:', email);
-        setEmail('');
+        setLoading(true);
+        setMessage(null);
+
+        try {
+            const response = await fetch('/subscribe', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+                body: JSON.stringify({ email }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                setMessage({ type: 'success', text: data.message });
+                setEmail('');
+            } else {
+                setMessage({ type: 'error', text: data.message });
+            }
+        } catch (error) {
+            setMessage({ type: 'error', text: 'An error occurred. Please try again later.' });
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -174,15 +201,22 @@ const ContactSection = () => {
                                         onChange={(e) => setEmail(e.target.value)}
                                         placeholder="Enter your email"
                                         required
-                                        className="flex-1 border-0 bg-white px-4 py-2 text-sm text-gray-900 placeholder:text-gray-500 focus:ring-2 focus:ring-[#2d5f5d] focus:outline-none"
+                                        disabled={loading}
+                                        className="flex-1 border-0 bg-white px-4 py-2 text-sm text-gray-900 placeholder:text-gray-500 focus:ring-2 focus:ring-[#2d5f5d] focus:outline-none disabled:opacity-50"
                                     />
                                     <button
                                         type="submit"
-                                        className="rounded-md bg-[#2d5f5d] px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#3d6b68]"
+                                        disabled={loading}
+                                        className="rounded-md bg-[#2d5f5d] px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#3d6b68] disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
-                                        Subscribe
+                                        {loading ? 'Subscribing...' : 'Subscribe'}
                                     </button>
                                 </div>
+                                {message && (
+                                    <p className={`text-sm ${message.type === 'success' ? 'text-green-300' : 'text-red-300'}`}>
+                                        {message.text}
+                                    </p>
+                                )}
                                 <p className="text-xs text-white/70">
                                     By subscribing to our mailing list, you agree with our{' '}
                                     <a href="/data-privacy" className="underline hover:text-white">
@@ -355,10 +389,28 @@ const AccommodationPage = ({ landingAreas, hotels, resorts, restaurants, accommo
                                                                     <Anchor className="h-6 w-6 text-blue-600" />
                                                                     {area.name}
                                                                 </h3>
-                                                                <div className="mb-3 inline-block rounded-full bg-blue-100 px-4 py-1.5">
-                                                                    <p className="text-lg font-bold text-blue-800">
-                                                                        ₱{typeof area.price === 'number' ? area.price.toFixed(2) : area.price}
-                                                                    </p>
+                                                                <div className="mb-3 space-y-2">
+                                                                    {area.price_per_adult && (
+                                                                        <div className="inline-block mr-2 rounded-full bg-blue-100 px-4 py-1.5">
+                                                                            <p className="text-sm font-bold text-blue-800">
+                                                                                Adult: ₱{typeof area.price_per_adult === 'number' ? area.price_per_adult.toFixed(2) : area.price_per_adult}
+                                                                            </p>
+                                                                        </div>
+                                                                    )}
+                                                                    {area.price_per_child && (
+                                                                        <div className="inline-block rounded-full bg-green-100 px-4 py-1.5">
+                                                                            <p className="text-sm font-bold text-green-800">
+                                                                                Child: ₱{typeof area.price_per_child === 'number' ? area.price_per_child.toFixed(2) : area.price_per_child}
+                                                                            </p>
+                                                                        </div>
+                                                                    )}
+                                                                    {!area.price_per_adult && !area.price_per_child && area.price && (
+                                                                        <div className="inline-block rounded-full bg-blue-100 px-4 py-1.5">
+                                                                            <p className="text-lg font-bold text-blue-800">
+                                                                                ₱{typeof area.price === 'number' ? area.price.toFixed(2) : area.price}
+                                                                            </p>
+                                                                        </div>
+                                                                    )}
                                                                 </div>
                                                                 {area.description && <p className="text-gray-700">{area.description}</p>}
                                                             </div>

@@ -24,6 +24,8 @@ class LandingAreaListController extends Controller
                     'image' => $landingArea->image,
                     'payment_qr' => $landingArea->payment_qr,
                     'price' => $landingArea->price,
+                    'price_per_adult' => $landingArea->price_per_adult,
+                    'price_per_child' => $landingArea->price_per_child,
                 ];
             });
 

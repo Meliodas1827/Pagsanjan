@@ -12,6 +12,7 @@ class HotelListController extends Controller
     public function index()
     {
         $hotels = Hotel::where('isdeleted', 0)
+            ->with('hotelImages')
             ->get()
             ->map(function ($hotel) {
                 return [
@@ -20,12 +21,17 @@ class HotelListController extends Controller
                     'location' => $hotel->location,
                     'description' => $hotel->description,
                     'image_url' => $hotel->image_url,
+                    'images' => $hotel->hotelImages->map(function ($image) {
+                        return [
+                            'id' => $image->id,
+                            'image_url' => $image->image_url,
+                        ];
+                    }),
                 ];
             });
 
-        return Inertia::render('customer/AccommodationPage', [
+        return Inertia::render('customer/HotelList', [
             'hotels' => $hotels,
-            'role' => auth()->check() ? auth()->user()->role_id : null
         ]);
     }
 }
