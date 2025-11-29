@@ -152,27 +152,12 @@ const ContactSection = () => {
                         <div className="text-start">
                             <nav className="space-y-2">
                                 <a
-                                    href="#about"
-                                    className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]"
-                                >
-                                    ABOUT US
-                                </a>
-                                <a
-                                    href="#activities"
-                                    className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]"
-                                >
-                                    ACTIVITIES
-                                </a>
-                                <a
-                                    href="#contact"
+                                    href="/contact-us"
                                     className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]"
                                 >
                                     CONTACT US
                                 </a>
-                                <a
-                                    href="#faqs"
-                                    className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]"
-                                >
+                                <a href="/faq" className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]">
                                     FAQS
                                 </a>
                                 <a
@@ -207,15 +192,13 @@ const ContactSection = () => {
                                     <button
                                         type="submit"
                                         disabled={loading}
-                                        className="rounded-md bg-[#2d5f5d] px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#3d6b68] disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="rounded-md bg-[#2d5f5d] px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#3d6b68] disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         {loading ? 'Subscribing...' : 'Subscribe'}
                                     </button>
                                 </div>
                                 {message && (
-                                    <p className={`text-sm ${message.type === 'success' ? 'text-green-300' : 'text-red-300'}`}>
-                                        {message.text}
-                                    </p>
+                                    <p className={`text-sm ${message.type === 'success' ? 'text-green-300' : 'text-red-300'}`}>{message.text}</p>
                                 )}
                                 <p className="text-xs text-white/70">
                                     By subscribing to our mailing list, you agree with our{' '}
@@ -391,16 +374,22 @@ const AccommodationPage = ({ landingAreas, hotels, resorts, restaurants, accommo
                                                                 </h3>
                                                                 <div className="mb-3 space-y-2">
                                                                     {area.price_per_adult && (
-                                                                        <div className="inline-block mr-2 rounded-full bg-blue-100 px-4 py-1.5">
+                                                                        <div className="mr-2 inline-block rounded-full bg-blue-100 px-4 py-1.5">
                                                                             <p className="text-sm font-bold text-blue-800">
-                                                                                Adult: ₱{typeof area.price_per_adult === 'number' ? area.price_per_adult.toFixed(2) : area.price_per_adult}
+                                                                                Adult: ₱
+                                                                                {typeof area.price_per_adult === 'number'
+                                                                                    ? area.price_per_adult.toFixed(2)
+                                                                                    : area.price_per_adult}
                                                                             </p>
                                                                         </div>
                                                                     )}
                                                                     {area.price_per_child && (
                                                                         <div className="inline-block rounded-full bg-green-100 px-4 py-1.5">
                                                                             <p className="text-sm font-bold text-green-800">
-                                                                                Child: ₱{typeof area.price_per_child === 'number' ? area.price_per_child.toFixed(2) : area.price_per_child}
+                                                                                Child: ₱
+                                                                                {typeof area.price_per_child === 'number'
+                                                                                    ? area.price_per_child.toFixed(2)
+                                                                                    : area.price_per_child}
                                                                             </p>
                                                                         </div>
                                                                     )}

@@ -82,22 +82,31 @@ const ContactSection = () => {
                         {/* Column 2 - Navigation Links */}
                         <div className="text-start">
                             <nav className="space-y-2">
-                                <a href="/#about" className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]">
+                                {/* <a href="/#about" className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]">
                                     ABOUT US
                                 </a>
                                 <a href="/#activities" className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]">
                                     ACTIVITIES
-                                </a>
-                                <a href="/#contact" className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]">
+                                </a> */}
+                                <a
+                                    href="/contact-us"
+                                    className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]"
+                                >
                                     CONTACT US
                                 </a>
-                                <a href="/#faqs" className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]">
+                                <a href="/faq" className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]">
                                     FAQS
                                 </a>
-                                <a href="/data-privacy" className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]">
+                                <a
+                                    href="/data-privacy"
+                                    className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]"
+                                >
                                     PRIVACY POLICY
                                 </a>
-                                <a href="/terms-conditions" className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]">
+                                <a
+                                    href="/terms-conditions"
+                                    className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]"
+                                >
                                     TERMS AND CONDITIONS
                                 </a>
                             </nav>
@@ -120,15 +129,13 @@ const ContactSection = () => {
                                     <button
                                         type="submit"
                                         disabled={loading}
-                                        className="rounded-md bg-[#2d5f5d] px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#3d6b68] disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="rounded-md bg-[#2d5f5d] px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#3d6b68] disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         {loading ? 'Subscribing...' : 'Subscribe'}
                                     </button>
                                 </div>
                                 {message && (
-                                    <p className={`text-sm ${message.type === 'success' ? 'text-green-300' : 'text-red-300'}`}>
-                                        {message.text}
-                                    </p>
+                                    <p className={`text-sm ${message.type === 'success' ? 'text-green-300' : 'text-red-300'}`}>{message.text}</p>
                                 )}
                                 <p className="text-xs text-white/70">
                                     By subscribing to our mailing list, you agree with our{' '}
@@ -199,71 +206,77 @@ export default function HotelList({ hotels = [] }: Props) {
                                     </div>
                                 ) : (
                                     filteredHotels.map((hotel, index) => (
-                                        <div
-                                            key={hotel.id}
-                                            className={`grid gap-8 rounded-2xl bg-white p-6 shadow-lg transition-all duration-300 hover:shadow-2xl md:grid-cols-2 md:gap-12 md:p-8 ${
-                                                index % 2 === 0 ? '' : 'md:grid-flow-dense'
-                                            }`}
-                                        >
-                                            {/* Description Section */}
-                                            <div className={`flex flex-col justify-center space-y-4 ${index % 2 === 0 ? '' : 'md:col-start-2'}`}>
-                                                <div className="mb-2">
-                                                    <h3 className="mb-3 flex items-center gap-2 text-2xl font-bold text-gray-900 md:text-3xl">
-                                                        <Building2 className="h-6 w-6 text-green-600" />
-                                                        {hotel.hotel_name}
-                                                    </h3>
-                                                    {hotel.description && <p className="text-gray-700">{hotel.description}</p>}
-                                                </div>
-
-                                                {hotel.location && (
-                                                    <div className="border-t border-gray-200 pt-4">
-                                                        <div className="flex items-start gap-3 text-gray-700">
-                                                            <MapPin className="mt-1 h-5 w-5 flex-shrink-0 text-gray-400" />
-                                                            <span>{hotel.location}</span>
-                                                        </div>
+                                        <div key={hotel.id} className="space-y-6">
+                                            <div
+                                                className={`grid gap-8 rounded-2xl bg-white p-6 shadow-lg transition-all duration-300 hover:shadow-2xl md:grid-cols-2 md:gap-12 md:p-8 ${
+                                                    index % 2 === 0 ? '' : 'md:grid-flow-dense'
+                                                }`}
+                                            >
+                                                {/* Description Section */}
+                                                <div className={`flex flex-col justify-center space-y-4 ${index % 2 === 0 ? '' : 'md:col-start-2'}`}>
+                                                    <div className="mb-2">
+                                                        <h3 className="mb-3 flex items-center gap-2 text-2xl font-bold text-gray-900 md:text-3xl">
+                                                            <Building2 className="h-6 w-6 text-green-600" />
+                                                            {hotel.hotel_name}
+                                                        </h3>
+                                                        {hotel.description && <p className="text-gray-700">{hotel.description}</p>}
                                                     </div>
-                                                )}
 
-                                                {/* Hotel Images Gallery */}
-                                                {hotel.images && hotel.images.length > 0 && (
-                                                    <div className="border-t border-gray-200 pt-4">
-                                                        <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-600">Gallery</h4>
-                                                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                                                            {hotel.images.slice(0, 6).map((image) => (
-                                                                <div key={image.id} className="relative overflow-hidden rounded-lg bg-gray-200 shadow-sm">
-                                                                    <img
-                                                                        src={image.image_url}
-                                                                        alt={`${hotel.hotel_name} gallery`}
-                                                                        className="h-20 w-full object-cover transition-transform duration-300 hover:scale-110"
-                                                                    />
-                                                                </div>
-                                                            ))}
+                                                    {hotel.location && (
+                                                        <div className="border-t border-gray-200 pt-4">
+                                                            <div className="flex items-start gap-3 text-gray-700">
+                                                                <MapPin className="mt-1 h-5 w-5 flex-shrink-0 text-gray-400" />
+                                                                <span>{hotel.location}</span>
+                                                            </div>
                                                         </div>
-                                                        {hotel.images.length > 6 && (
-                                                            <p className="mt-2 text-xs text-gray-500">+{hotel.images.length - 6} more images</p>
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </div>
+                                                    )}
 
-                                            {/* Image and Button Section */}
-                                            <div className={`flex flex-col gap-4 ${index % 2 === 0 ? '' : 'md:col-start-1 md:row-start-1'}`}>
-                                                <div className="relative overflow-hidden rounded-xl bg-gray-200 shadow-md">
-                                                    {hotel.image_url ? (
-                                                        <img
-                                                            src={hotel.image_url}
-                                                            alt={hotel.hotel_name}
-                                                            className="h-80 w-full object-cover transition-transform duration-500 hover:scale-105 md:h-96"
-                                                        />
-                                                    ) : (
-                                                        <div className="flex h-80 w-full items-center justify-center bg-gradient-to-br from-green-100 to-green-200 md:h-96">
-                                                            <Building2 className="h-24 w-24 text-green-600 opacity-50" />
+                                                    {/* Hotel Images - Maximum 10 */}
+                                                    {hotel.images && Array.isArray(hotel.images) && hotel.images.length > 0 && (
+                                                        <div className="border-t border-gray-200 pt-4">
+                                                            <h4 className="mb-3 text-sm font-semibold text-gray-800">
+                                                                Hotel Images ({Math.min(hotel.images.length, 10)} of {hotel.images.length})
+                                                            </h4>
+                                                            <div className="grid grid-cols-5 gap-2">
+                                                                {hotel.images.slice(0, 10).map((image, imgIndex) => (
+                                                                    <div
+                                                                        key={image.id || imgIndex}
+                                                                        className="relative aspect-square overflow-hidden rounded-lg bg-gray-200 shadow-sm"
+                                                                    >
+                                                                        <img
+                                                                            src={image.image_url}
+                                                                            alt={`${hotel.hotel_name} - Image ${imgIndex + 1}`}
+                                                                            className="h-full w-full object-cover transition-transform duration-300 hover:scale-110"
+                                                                            onError={(e) => {
+                                                                                e.currentTarget.src = '/images/placeholder.png';
+                                                                            }}
+                                                                        />
+                                                                    </div>
+                                                                ))}
+                                                            </div>
                                                         </div>
                                                     )}
                                                 </div>
-                                                <Button asChild size="lg" className="w-full bg-[#2d5f5d] text-lg hover:bg-[#3d6b68]">
-                                                    <Link href={`/hotel/${hotel.id}`}>Book Now</Link>
-                                                </Button>
+
+                                                {/* Image and Button Section */}
+                                                <div className={`flex flex-col gap-4 ${index % 2 === 0 ? '' : 'md:col-start-1 md:row-start-1'}`}>
+                                                    <div className="relative aspect-square overflow-hidden rounded-xl bg-gray-200 shadow-md">
+                                                        {hotel.image_url ? (
+                                                            <img
+                                                                src={hotel.image_url}
+                                                                alt={hotel.hotel_name}
+                                                                className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+                                                            />
+                                                        ) : (
+                                                            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-green-100 to-green-200">
+                                                                <Building2 className="h-24 w-24 text-green-600 opacity-50" />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <Button asChild size="lg" className="w-full bg-[#2d5f5d] text-lg hover:bg-[#3d6b68]">
+                                                        <Link href={`/hotel/${hotel.id}`}>Book Now</Link>
+                                                    </Button>
+                                                </div>
                                             </div>
                                         </div>
                                     ))

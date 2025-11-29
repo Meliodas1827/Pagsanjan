@@ -1,6 +1,6 @@
+import { useState } from 'react';
 import PublicNavBar from './components/public-nav-bar';
 import TermsAndConditions from './TermsConditions';
-import { useState } from 'react';
 
 // Footer Component
 const Footer = () => {
@@ -60,27 +60,12 @@ const Footer = () => {
                     <div className="text-start">
                         <nav className="space-y-2">
                             <a
-                                href="#about"
-                                className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]"
-                            >
-                                ABOUT US
-                            </a>
-                            <a
-                                href="#activities"
-                                className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]"
-                            >
-                                ACTIVITIES
-                            </a>
-                            <a
-                                href="#contact"
+                                href="/contact-us"
                                 className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]"
                             >
                                 CONTACT US
                             </a>
-                            <a
-                                href="#faqs"
-                                className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]"
-                            >
+                            <a href="/faq" className="block text-sm font-semibold tracking-wide uppercase transition-colors hover:text-[#000000]">
                                 FAQS
                             </a>
                             <a
@@ -115,16 +100,12 @@ const Footer = () => {
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="rounded-md bg-[#2d5f5d] px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#3d6b68] disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="rounded-md bg-[#2d5f5d] px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#3d6b68] disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     {loading ? 'Subscribing...' : 'Subscribe'}
                                 </button>
                             </div>
-                            {message && (
-                                <p className={`text-sm ${message.type === 'success' ? 'text-green-300' : 'text-red-300'}`}>
-                                    {message.text}
-                                </p>
-                            )}
+                            {message && <p className={`text-sm ${message.type === 'success' ? 'text-green-300' : 'text-red-300'}`}>{message.text}</p>}
                             <p className="text-xs text-white/70">
                                 By subscribing to our mailing list, you agree with our{' '}
                                 <a href="/data-privacy" className="underline hover:text-white">

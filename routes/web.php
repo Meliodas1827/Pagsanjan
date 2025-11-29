@@ -37,7 +37,6 @@ use App\Http\Controllers\Customer\HotelDetailsController;
 use App\Http\Controllers\Customer\RoomBookingController;
 use App\Http\Controllers\Customer\HotelBookingController;
 use App\Http\Controllers\Customer\RestaurantListController;
-use App\Http\Controllers\HotelList;
 use App\Http\Controllers\Resort\BookingInfoController;
 use App\Http\Controllers\Resort\GuestInfoController;
 use App\Http\Controllers\Resort\ResortPaymentController;
@@ -177,6 +176,21 @@ Route::group([], function () {
             'role' => auth()->check() ? auth()->user()->role_id : null
         ]);
     })->name('terms-conditions');
+
+    Route::get('/faq', function () {
+        $adminEmail = \App\Models\User::where('role_id', 1)->first()?->email ?? 'info@pagsanjanfalls.com';
+
+        return Inertia::render('landing-page/FAQPage', [
+            'role' => auth()->check() ? auth()->user()->role_id : null,
+            'adminEmail' => $adminEmail
+        ]);
+    })->name('faq');
+
+    Route::get('/contact-us', function () {
+        return Inertia::render('landing-page/ContactUsPage', [
+            'role' => auth()->check() ? auth()->user()->role_id : null
+        ]);
+    })->name('contact-us');
 
     Route::get('/hotel/{id}', [HotelDetailsController::class, 'show'])
         ->name('hotel.details');
@@ -483,7 +497,7 @@ Route::middleware(['auth', 'verified', 'guest-profile', 'role:admin,resort,custo
     // refund
     Route::post('refund-my-bookings/{booking_id}', [CancelBookingController::class, 'refundBooking'])->name('refund.bookings');
 
-    Route::get('hotel-list', [HotelList::class, 'index'])->name('hotel.list');
+    // Route::get('hotel-list', [HotelList::class, 'index'])->name('hotel.list');
     Route::get('restaurant-list', [RestaurantListController::class, 'index'])->name('restaurant-list.customer');
 
     // check availability

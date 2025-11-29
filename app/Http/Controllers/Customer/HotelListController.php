@@ -26,10 +26,9 @@ class HotelListController extends Controller
                             'id' => $image->id,
                             'image_url' => $image->image_url,
                         ];
-                    }),
+                    })->values()->toArray(),
                 ];
-            });
-
+            })->values()->toArray();
         return Inertia::render('customer/HotelList', [
             'hotels' => $hotels,
         ]);
