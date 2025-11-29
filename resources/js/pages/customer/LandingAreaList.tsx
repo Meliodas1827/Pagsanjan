@@ -6,6 +6,11 @@ import { Anchor, MapPin, Search, Users } from 'lucide-react';
 import { useState } from 'react';
 import CustomerLayout from './layout/layout';
 
+interface LandingAreaImage {
+    id: number;
+    image_url: string;
+}
+
 interface LandingArea {
     id: number;
     name: string;
@@ -16,6 +21,7 @@ interface LandingArea {
     image: string | null;
     payment_qr: string | null;
     price: number | string;
+    images: LandingAreaImage[];
 }
 
 interface Props {
@@ -74,6 +80,32 @@ export default function LandingAreaList({ landingAreas }: Props) {
                                 <CardContent className="space-y-4">
                                     {area.description && (
                                         <p className="line-clamp-2 text-sm text-muted-foreground">{area.description}</p>
+                                    )}
+
+                                    {/* Landing Area Images - Maximum 10 */}
+                                    {area.images && Array.isArray(area.images) && area.images.length > 0 && (
+                                        <div className="border-t border-gray-200 pt-4">
+                                            <h4 className="mb-3 text-sm font-semibold text-gray-800">
+                                                Images ({Math.min(area.images.length, 10)} of {area.images.length})
+                                            </h4>
+                                            <div className="grid grid-cols-5 gap-2">
+                                                {area.images.slice(0, 10).map((image, imgIndex) => (
+                                                    <div
+                                                        key={image.id || imgIndex}
+                                                        className="relative aspect-square overflow-hidden rounded-lg bg-gray-200 shadow-sm"
+                                                    >
+                                                        <img
+                                                            src={image.image_url}
+                                                            alt={`${area.name} - Image ${imgIndex + 1}`}
+                                                            className="h-full w-full object-cover transition-transform duration-300 hover:scale-110"
+                                                            onError={(e) => {
+                                                                e.currentTarget.src = '/images/placeholder.png';
+                                                            }}
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
                                     )}
 
                                     <div className="grid grid-cols-2 gap-4 text-sm">

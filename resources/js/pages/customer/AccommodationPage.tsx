@@ -8,6 +8,10 @@ import PublicNavBar from '../landing-page/components/public-nav-bar';
 
 type AccommodationType = 'landingAreas' | 'hotels' | 'resorts' | 'restaurants';
 
+interface LandingAreaImage {
+    id: number;
+    image_path: string | null;
+}
 interface LandingArea {
     id: number;
     name: string;
@@ -16,6 +20,7 @@ interface LandingArea {
     address: string | null;
     capacity: number;
     image: string | null;
+    images: LandingAreaImage[];
     payment_qr: string | null;
     price: number | string;
     price_per_adult?: number | string | null;
@@ -224,7 +229,6 @@ const AccommodationPage = ({ landingAreas, hotels, resorts, restaurants, accommo
     const { auth } = usePage<SharedData>().props;
     const user = auth?.user?.role_id ?? 0;
     const [searchTerm, setSearchTerm] = useState('');
-
     // Determine initial active tab based on available data
     const getInitialTab = (): AccommodationType => {
         if (landingAreas) return 'landingAreas';
@@ -412,6 +416,40 @@ const AccommodationPage = ({ landingAreas, hotels, resorts, restaurants, accommo
                                                                     </div>
                                                                 )}
                                                             </div>
+
+                                                            {Array.isArray(area.images) && area.images.some((img) => img?.image_url) ? (
+                                                                <div className="border-t border-gray-200 pt-4">
+                                                                    <h4 className="mb-3 text-sm font-semibold text-gray-800">
+                                                                        Images ({area.images.filter((img) => img?.image_url).length})
+                                                                    </h4>
+
+                                                                    <div className="grid grid-cols-5 gap-2">
+                                                                        {area.images
+                                                                            .filter((img) => img?.image_url) // remove null entries
+                                                                            .slice(0, 10) // limit to 10 images
+                                                                            .map((img, index) => (
+                                                                                <div
+                                                                                    key={img.id || index}
+                                                                                    className="relative aspect-square overflow-hidden rounded-lg bg-gray-200 shadow-sm"
+                                                                                >
+                                                                                    <img
+                                                                                        src={`/storage/${img.image_url}`}
+                                                                                        alt={`${area.name} - Image ${index + 1}`}
+                                                                                        className="h-full w-full object-cover transition-transform duration-300 hover:scale-110"
+                                                                                        onError={(e) => {
+                                                                                            e.currentTarget.src = '/images/placeholder.png';
+                                                                                        }}
+                                                                                    />
+                                                                                </div>
+                                                                            ))}
+                                                                    </div>
+                                                                </div>
+                                                            ) : (
+                                                                <>
+                                                                    <hr />
+                                                                    <h2 className="text-sm text-gray-500">No other images to show</h2>
+                                                                </>
+                                                            )}
                                                         </div>
 
                                                         {/* Image and Button Section */}

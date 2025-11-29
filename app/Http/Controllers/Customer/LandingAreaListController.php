@@ -12,6 +12,7 @@ class LandingAreaListController extends Controller
     public function index()
     {
         $landingAreas = LandingArea::where('is_active', true)
+            ->with('images')
             ->get()
             ->map(function ($landingArea) {
                 return [
@@ -26,8 +27,14 @@ class LandingAreaListController extends Controller
                     'price' => $landingArea->price,
                     'price_per_adult' => $landingArea->price_per_adult,
                     'price_per_child' => $landingArea->price_per_child,
+                    'images' => $landingArea->images->map(function ($image) {
+                        return [
+                            'id' => $image->id,
+                            'image_url' => $image->image_path,
+                        ];
+                    })->values()->toArray(),
                 ];
-            });
+            })->values()->toArray();
 
         return Inertia::render('customer/AccommodationPage', [
             'landingAreas' => $landingAreas,
